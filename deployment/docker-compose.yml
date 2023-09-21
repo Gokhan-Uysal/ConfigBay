@@ -1,0 +1,46 @@
+services:
+  db:
+    image: postgres:15-bullseye
+    restart: always
+    container_name: ${APP_NAME}-db
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB}
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+    networks:
+      - backend_bridge
+    volumes:
+      - db_volume:/var/lib/postgresql/data
+      - ../asset/sql:/docker-entrypoint-initdb.d
+    ports:
+      - "5432:5432"
+
+  api:
+    depends_on:
+      - db
+    build:
+      context: ../
+      dockerfile: Dockerfile
+      args:
+        GOOS: linux
+        GOARCH: amd64
+        IS_CONTAINER: True
+    container_name: ${APP_NAME}-api
+    environment:
+      CONF_PATH: ${CONF_PATH}
+      DB_NAME: ${POSTGRES_DB}
+      DB_USER: ${POSTGRES_USER}
+      DB_PASSWORD: ${POSTGRES_PASSWORD}
+    networks:
+      - backend_bridge
+    volumes:
+      - api_volume:/etc/runtime/configbay
+    ports:
+      - "8080:8080"
+
+volumes:
+  api_volume:
+  db_volume:
+
+networks:
+  backend_bridge:
