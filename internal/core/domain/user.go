@@ -5,9 +5,7 @@ import "time"
 type (
 	// UserBuilder constructs a User entity
 	UserBuilder interface {
-		Id(int) UserBuilder
-		Username(string) UserBuilder
-		Email(Email) UserBuilder
+		Active(bool) UserBuilder
 		CreatedAt(time.Time) UserBuilder
 		UpdatedAt(time.Time) UserBuilder
 		Builder[User]
@@ -15,9 +13,10 @@ type (
 
 	// User represents a user entity
 	User interface {
-		Id() int
+		Id() ID
 		Username() string
 		Email() Email
+		Active() bool
 		Timestamp
 	}
 
@@ -26,30 +25,21 @@ type (
 	}
 
 	user struct {
-		id        int
+		id        ID
 		username  string
 		email     Email
+		active    bool
 		createdAt time.Time
 		updatedAt time.Time
 	}
 )
 
-func NewUserBuilder(username string, email Email) UserBuilder {
-	return &userBuilder{user{id: -1, username: username, email: email}}
+func NewUserBuilder(id ID, username string, email Email) UserBuilder {
+	return &userBuilder{user{id: id, username: username, email: email}}
 }
 
-func (ub *userBuilder) Id(id int) UserBuilder {
-	ub.id = id
-	return ub
-}
-
-func (ub *userBuilder) Username(username string) UserBuilder {
-	ub.username = username
-	return ub
-}
-
-func (ub *userBuilder) Email(email Email) UserBuilder {
-	ub.email = email
+func (ub *userBuilder) Active(active bool) UserBuilder {
+	ub.active = active
 	return ub
 }
 
@@ -68,12 +58,13 @@ func (ub *userBuilder) Build() User {
 		id:        ub.id,
 		username:  ub.username,
 		email:     ub.email,
+		active:    ub.active,
 		createdAt: ub.createdAt,
 		updatedAt: ub.updatedAt,
 	}
 }
 
-func (u *user) Id() int {
+func (u *user) Id() ID {
 	return u.id
 }
 
@@ -83,6 +74,10 @@ func (u *user) Username() string {
 
 func (u *user) Email() Email {
 	return u.email
+}
+
+func (u *user) Active() bool {
+	return u.active
 }
 
 func (u *user) CreatedAt() time.Time {

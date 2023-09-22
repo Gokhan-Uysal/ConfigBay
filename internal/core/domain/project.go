@@ -4,7 +4,6 @@ import "time"
 
 type (
 	ProjectBuilder interface {
-		Id(int) ProjectBuilder
 		Secrets(...Secret) ProjectBuilder
 		Groups(...Group) ProjectBuilder
 		CreatedAt(time.Time) ProjectBuilder
@@ -13,7 +12,7 @@ type (
 	}
 
 	Project interface {
-		Id() int
+		Id() ID
 		Title() string
 		Secrets() []Secret
 		Groups() []Group
@@ -27,7 +26,7 @@ type (
 	}
 
 	project struct {
-		id        int
+		id        ID
 		title     string
 		secrets   []Secret
 		groups    []Group
@@ -36,13 +35,8 @@ type (
 	}
 )
 
-func NewProjectBuilder(title string) ProjectBuilder {
-	return &projectBuilder{project{id: -1, title: title}}
-}
-
-func (pb *projectBuilder) Id(id int) ProjectBuilder {
-	pb.id = id
-	return pb
+func NewProjectBuilder(id ID, title string) ProjectBuilder {
+	return &projectBuilder{project{id: id, title: title}}
 }
 
 func (pb *projectBuilder) Secrets(secrets ...Secret) ProjectBuilder {
@@ -76,7 +70,7 @@ func (pb *projectBuilder) Build() Project {
 	}
 }
 
-func (p *project) Id() int {
+func (p *project) Id() ID {
 	return p.id
 }
 

@@ -1,6 +1,7 @@
 package service
 
 import (
+	"github.com/Gokhan-Uysal/ConfigBay.git/internal/core/common"
 	"github.com/Gokhan-Uysal/ConfigBay.git/internal/core/domain"
 	"github.com/Gokhan-Uysal/ConfigBay.git/internal/core/port"
 	"github.com/Gokhan-Uysal/ConfigBay.git/internal/lib/logger"
@@ -10,26 +11,64 @@ import (
 type (
 	projectService struct {
 		projectRepo port.ProjectRepo
+		userRepo    port.UserRepo
 	}
 )
 
-func NewProjectService(projectRepo port.ProjectRepo) port.ProjectService {
-	return &projectService{projectRepo: projectRepo}
+func NewProjectService(
+	projectRepo port.ProjectRepo,
+	userRepo port.UserRepo,
+) (port.ProjectService, error) {
+	if projectRepo == nil {
+		return nil, common.NilPointerErr{Item: "project repository"}
+	}
+	if userRepo == nil {
+		return nil, common.NilPointerErr{Item: "user repository"}
+	}
+	return &projectService{projectRepo: projectRepo, userRepo: userRepo}, nil
 }
 
-func (ps *projectService) Create(title string) {
+func (ps *projectService) Init(
+	userId domain.ID,
+	projectTitle string,
+	groupTitle string,
+) (domain.Project,
+	error) {
 	var (
-		project domain.Project
-		err     error
+		user       domain.User
+		adminGroup domain.Group
+		project    domain.Project
+		err        error
 	)
-	project = domain.NewProjectBuilder(title).
-		CreatedAt(time.Now()).
-		UpdatedAt(time.Now()).
-		Build()
 
-	_, err = ps.projectRepo.Save(project)
+	user, err = ps.userRepo.GetById(userId)
 	if err != nil {
 		logger.ERR.Println(err)
-		return
+		return nil, err
 	}
+
+	adminGroup = domain.NewGroupBuilder(domain.NewUUID(), groupTitle).
+		Roles(
+			domain.ManageGroups,
+			domain.ManageUsers,
+			domain.ReadSecrets,
+			domain.WriteSecrets,
+			domain.DeleteSecrets,
+		).
+		Users(user).
+		Build()
+
+	project = domain.NewProjectBuilder(domain.NewUUID(), projectTitle).
+		CreatedAt(time.Now()).
+		UpdatedAt(time.Now()).
+		Groups(adminGroup).
+		Build()
+
+	err = ps.projectRepo.Save(project)
+	if err != nil {
+		logger.ERR.Println(err)
+		return nil, err
+	}
+
+	return project, nil
 }

@@ -1,6 +1,6 @@
 DROP TABLE IF EXISTS projects CASCADE;
 CREATE TABLE projects (
-    id SERIAL PRIMARY KEY NOT NULL,
+    id UUID PRIMARY KEY NOT NULL,
     title VARCHAR(255),
     created_at TIMESTAMP,
     updated_at TIMESTAMP
@@ -8,11 +8,11 @@ CREATE TABLE projects (
 
 DROP TABLE IF EXISTS secrets CASCADE;
 CREATE TABLE secrets (
-    id SERIAL PRIMARY KEY,
+    id UUID PRIMARY KEY,
     key VARCHAR(255) NOT NULL,
     value TEXT NOT NULL,
     version INT DEFAULT 1,
-    project_id SERIAL NOT NULL,
+    project_id UUID NOT NULL,
     created_at TIMESTAMP,
     updated_at TIMESTAMP,
     FOREIGN KEY (project_id) REFERENCES projects(id)
@@ -20,7 +20,7 @@ CREATE TABLE secrets (
 
 DROP TABLE IF EXISTS users CASCADE;
 CREATE TABLE users (
-    id SERIAL PRIMARY KEY,
+    id UUID PRIMARY KEY,
     username VARCHAR(50) NOT NULL,
     email VARCHAR(255) NOT NULL,
     active BOOLEAN DEFAULT TRUE,
@@ -30,9 +30,9 @@ CREATE TABLE users (
 
 DROP TABLE IF EXISTS groups CASCADE;
 CREATE TABLE groups (
-    id SERIAL PRIMARY KEY,
+    id UUID PRIMARY KEY,
     title VARCHAR(255) NOT NULL,
-    project_id SERIAL NOT NULL,
+    project_id UUID NOT NULL,
     created_at TIMESTAMP,
     updated_at TIMESTAMP,
     FOREIGN KEY (project_id) REFERENCES projects(id)
@@ -46,7 +46,7 @@ CREATE TABLE roles (
 -- Many to many relations
 DROP TABLE IF EXISTS group_roles;
 CREATE TABLE group_roles (
-    group_id SERIAL NOT NULL,
+    group_id UUID NOT NULL,
     role VARCHAR(255) NOT NULL,
     PRIMARY KEY (group_id, role),
     FOREIGN KEY (group_id) REFERENCES groups(id),
@@ -55,8 +55,8 @@ CREATE TABLE group_roles (
 
 DROP TABLE IF EXISTS group_users;
 CREATE TABLE group_users (
-    group_id SERIAL NOT NULL,
-    user_id SERIAL NOT NULL,
+    group_id UUID NOT NULL,
+    user_id UUID NOT NULL,
     PRIMARY KEY (group_id, user_id),
     FOREIGN KEY (group_id) REFERENCES groups(id),
     FOREIGN KEY (user_id) REFERENCES users(id)
@@ -64,7 +64,7 @@ CREATE TABLE group_users (
 
 DROP TABLE IF EXISTS user_tokens;
 CREATE TABLE user_tokens (
-    user_id SERIAL NOT NULL,
+    user_id UUID NOT NULL,
     access_token TEXT NOT NULL,
     FOREIGN KEY (user_id) REFERENCES users(id)
 );

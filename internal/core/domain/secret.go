@@ -4,7 +4,6 @@ import "time"
 
 type (
 	SecretBuilder interface {
-		Id(int) SecretBuilder
 		Key(string) SecretBuilder
 		Value(string) SecretBuilder
 		CreatedAt(time.Time) SecretBuilder
@@ -13,7 +12,7 @@ type (
 	}
 
 	Secret interface {
-		Id() int
+		Id() ID
 		Key() string
 		Value() string
 		Timestamp
@@ -24,7 +23,7 @@ type (
 	}
 
 	secret struct {
-		id        int
+		id        ID
 		key       string
 		value     string
 		createdAt time.Time
@@ -32,13 +31,8 @@ type (
 	}
 )
 
-func NewSecretBuilder(key string, value string) SecretBuilder {
-	return &secretBuilder{secret{id: -1, key: key, value: value}}
-}
-
-func (sb *secretBuilder) Id(id int) SecretBuilder {
-	sb.id = id
-	return sb
+func NewSecretBuilder(id ID, key string, value string) SecretBuilder {
+	return &secretBuilder{secret{id: id, key: key, value: value}}
 }
 
 func (sb *secretBuilder) Key(key string) SecretBuilder {
@@ -71,7 +65,7 @@ func (sb *secretBuilder) Build() Secret {
 	}
 }
 
-func (s *secret) Id() int {
+func (s *secret) Id() ID {
 	return s.id
 }
 

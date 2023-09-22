@@ -4,7 +4,6 @@ import "time"
 
 type (
 	GroupBuilder interface {
-		Id(int) GroupBuilder
 		Users(...User) GroupBuilder
 		Roles(...Role) GroupBuilder
 		CreatedAt(time.Time) GroupBuilder
@@ -13,7 +12,7 @@ type (
 	}
 
 	Group interface {
-		Id() int
+		Id() ID
 		Title() string
 		Users() []User
 		Roles() []Role
@@ -26,7 +25,7 @@ type (
 	}
 
 	group struct {
-		id        int
+		id        ID
 		title     string
 		users     []User
 		roles     []Role
@@ -35,13 +34,8 @@ type (
 	}
 )
 
-func NewGroupBuilder(title string) GroupBuilder {
-	return &groupBuilder{group{title: title}}
-}
-
-func (gb *groupBuilder) Id(id int) GroupBuilder {
-	gb.id = id
-	return gb
+func NewGroupBuilder(id ID, title string) GroupBuilder {
+	return &groupBuilder{group{id: id, title: title}}
 }
 
 func (gb *groupBuilder) Users(users ...User) GroupBuilder {
@@ -74,7 +68,7 @@ func (gb *groupBuilder) Build() Group {
 	}
 }
 
-func (g *group) Id() int {
+func (g *group) Id() ID {
 	return g.id
 }
 
