@@ -1,7 +1,7 @@
 {
-  "host": "",
+  "host": "db.configbay",
   "port": 5432,
-  "name": "envdock",
+  "name": "configbay",
   "user": "developer",
   "password": "postgres"
 }

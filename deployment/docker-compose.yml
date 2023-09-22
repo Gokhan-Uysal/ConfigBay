@@ -1,8 +1,8 @@
 services:
-  db:
-    image: postgres:15-bullseye
+  db.configbay:
+    image: postgres:16-bullseye
     restart: always
-    container_name: ${APP_NAME}-db
+    container_name: db.configbay
     environment:
       POSTGRES_DB: ${POSTGRES_DB}
       POSTGRES_USER: ${POSTGRES_USER}
@@ -15,9 +15,9 @@ services:
     ports:
       - "5432:5432"
 
-  api:
+  api.configbay:
     depends_on:
-      - db
+      - db.configbay
     build:
       context: ../
       dockerfile: Dockerfile
@@ -25,7 +25,7 @@ services:
         GOOS: linux
         GOARCH: amd64
         IS_CONTAINER: True
-    container_name: ${APP_NAME}-api
+    container_name: api.configbay
     environment:
       CONF_PATH: ${CONF_PATH}
       DB_NAME: ${POSTGRES_DB}
