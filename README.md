@@ -1,1 +1,1 @@
-# ConfigBayV2
+# ConfigBay
