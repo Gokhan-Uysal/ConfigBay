@@ -58,7 +58,7 @@ rebuild-cli: clean-cli build-cli
 
 stop-api:
 	@echo "Stopping..."
-	@pkill $(API_BIN)
+	@pkill -f $(API_BIN)
 	@echo "Stopped!"
 
 restart-api: stop-api clean-api start-api

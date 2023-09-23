@@ -1,12 +1,11 @@
 package port
 
 import (
-	"database/sql"
-	"github.com/Gokhan-Uysal/ConfigBay.git/internal/core/domain"
+	"github.com/Gokhan-Uysal/ConfigBay.git/internal/core/domain/aggregate"
 )
 
 type (
 	ProjectRepo interface {
-		Save(domain.Project) (sql.Result, error)
+		Save(project aggregate.Project) error
 	}
 )

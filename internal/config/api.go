@@ -5,6 +5,7 @@ type Api struct {
 	Name     string `json:"name"`
 	Host     string `json:"host"`
 	Port     int    `json:"port"`
+	LogLevel string `json:"logLevel"`
 	Template string `json:"template"`
 	Static   string `json:"static"`
 }
