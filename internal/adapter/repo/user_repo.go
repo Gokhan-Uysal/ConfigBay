@@ -79,6 +79,8 @@ func (ur *userRepo) mapUser(rows *sql.Rows) ([]domain.User, error) {
 		users []domain.User
 	)
 
+	defer ur.baseRepo.CloseRows(rows)
+
 	for rows.Next() {
 		var (
 			id        uuid.UUID

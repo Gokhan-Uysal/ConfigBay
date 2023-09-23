@@ -19,7 +19,7 @@ func newBaseRepo(db *sql.DB) (port.BaseRepo, error) {
 	return &baseRepo{db: db}, nil
 }
 
-func (br *baseRepo) Exec(tx *sql.Tx, query string, args ...interface{}) (sql.Result, error) {
+func (br baseRepo) Exec(tx *sql.Tx, query string, args ...any) (sql.Result, error) {
 	var (
 		result sql.Result
 		err    error
@@ -38,7 +38,7 @@ func (br *baseRepo) Exec(tx *sql.Tx, query string, args ...interface{}) (sql.Res
 	return result, nil
 }
 
-func (br *baseRepo) Query(tx *sql.Tx, query string, args ...interface{}) (*sql.Rows, error) {
+func (br baseRepo) Query(tx *sql.Tx, query string, args ...any) (*sql.Rows, error) {
 	var (
 		rows *sql.Rows
 		err  error
@@ -57,10 +57,10 @@ func (br *baseRepo) Query(tx *sql.Tx, query string, args ...interface{}) (*sql.R
 	return rows, nil
 }
 
-func (br *baseRepo) QueryRow(
+func (br baseRepo) QueryRow(
 	tx *sql.Tx,
 	query string,
-	args ...interface{},
+	args ...any,
 ) *sql.Row {
 	var (
 		row *sql.Row
@@ -74,7 +74,7 @@ func (br *baseRepo) QueryRow(
 	return row
 }
 
-func (br *baseRepo) CloseRows(rows *sql.Rows) {
+func (br baseRepo) CloseRows(rows *sql.Rows) {
 	err := rows.Close()
 	if err != nil {
 		logger.ERR.Println("failed to close rows:", err)
@@ -82,15 +82,16 @@ func (br *baseRepo) CloseRows(rows *sql.Rows) {
 	}
 }
 
-func (br *baseRepo) Begin() (*sql.Tx, error) {
+func (br baseRepo) Begin() (*sql.Tx, error) {
 	return br.db.Begin()
 }
 
-func (br *baseRepo) CommitOrRollback(tx *sql.Tx, err error) error {
+func (br baseRepo) CommitOrRollback(tx *sql.Tx, err error) error {
 	if err != nil {
 		rollbackErr := tx.Rollback()
 		if rollbackErr != nil {
 			logger.ERR.Println("failed to rollback ", rollbackErr)
+			return rollbackErr
 		}
 		return err
 	}

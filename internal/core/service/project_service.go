@@ -43,8 +43,8 @@ func (ps *projectService) Init(
 
 	user, err = ps.userRepo.GetById(userId)
 	if err != nil {
-		logger.ERR.Println(err)
-		return nil, err
+		logger.ERR.Printf("Failed to get user by ID (%s): %v\n", userId.String(), err)
+		return nil, UserNotFoundErr{Field: userId.String()}
 	}
 
 	adminGroup = domain.NewGroupBuilder(domain.NewUUID(), groupTitle).
@@ -66,8 +66,8 @@ func (ps *projectService) Init(
 
 	err = ps.projectRepo.Save(project)
 	if err != nil {
-		logger.ERR.Println(err)
-		return nil, err
+		logger.ERR.Printf("Failed to save project (%s): %v\n", projectTitle, err)
+		return nil, ProjectCreationErr{Title: projectTitle}
 	}
 
 	return project, nil

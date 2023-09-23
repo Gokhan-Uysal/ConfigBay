@@ -2,7 +2,6 @@ package repo
 
 import (
 	"database/sql"
-
 	"github.com/Gokhan-Uysal/ConfigBay.git/internal/core/domain"
 	"github.com/Gokhan-Uysal/ConfigBay.git/internal/core/port"
 	"github.com/Gokhan-Uysal/ConfigBay.git/internal/lib/logger"
@@ -22,11 +21,12 @@ func NewProjectRepo(db *sql.DB) (port.ProjectRepo, error) {
 	return &projectRepo{baseRepo: base}, nil
 }
 
-func (pr *projectRepo) Save(project domain.Project) error {
+func (pr projectRepo) Save(project domain.Project) error {
 	var (
 		tx  *sql.Tx
 		err error
 	)
+	logger.DEBUG.Println("Starting to save project.")
 
 	tx, err = pr.baseRepo.Begin()
 	if err != nil {
@@ -64,10 +64,11 @@ func (pr *projectRepo) Save(project domain.Project) error {
 		}
 	}
 
-	return nil
+	logger.DEBUG.Println("Project saved.")
+	return pr.baseRepo.CommitOrRollback(tx, err)
 }
 
-func (pr *projectRepo) SaveProject(tx *sql.Tx, project domain.Project) (sql.Result, error) {
+func (pr projectRepo) SaveProject(tx *sql.Tx, project domain.Project) (sql.Result, error) {
 	var (
 		result sql.Result
 		err    error
@@ -86,7 +87,7 @@ func (pr *projectRepo) SaveProject(tx *sql.Tx, project domain.Project) (sql.Resu
 	return result, nil
 }
 
-func (pr *projectRepo) AssignGroupToProject(
+func (pr projectRepo) AssignGroupToProject(
 	tx *sql.Tx,
 	projectId domain.ID,
 	group domain.Group,
@@ -109,7 +110,7 @@ func (pr *projectRepo) AssignGroupToProject(
 	return result, nil
 }
 
-func (pr *projectRepo) AssignUserToGroup(
+func (pr projectRepo) AssignUserToGroup(
 	tx *sql.Tx,
 	groupId domain.ID,
 	userId domain.ID,
@@ -132,7 +133,7 @@ func (pr *projectRepo) AssignUserToGroup(
 	return result, nil
 }
 
-func (pr *projectRepo) AssignRoleToGroup(
+func (pr projectRepo) AssignRoleToGroup(
 	tx *sql.Tx,
 	groupId domain.ID,
 	role domain.Role,

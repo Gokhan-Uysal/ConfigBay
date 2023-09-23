@@ -86,5 +86,5 @@ func main() {
 	if err != nil {
 		logger.ERR.Fatalln(err)
 	}
-	logger.DEBUG.Println(project)
+	logger.DEBUG.Println(project.Groups())
 }

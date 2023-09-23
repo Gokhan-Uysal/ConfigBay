@@ -3,6 +3,7 @@
   "name": "configbay",
   "host": "127.0.0.1",
   "port": 8080,
+  "logLevel": "DEBUG",
   "template": "web/template",
   "static": "web/static"
 }
