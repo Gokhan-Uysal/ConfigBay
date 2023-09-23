@@ -49,6 +49,7 @@ func main() {
 		projectService port.ProjectService
 		err            error
 	)
+
 	//Connect to db
 	dsn := db.MakeDsn(dbConf)
 	DB := db.Init("postgres", dsn)
