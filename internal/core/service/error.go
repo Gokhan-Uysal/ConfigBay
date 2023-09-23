@@ -10,6 +10,10 @@ type (
 	ProjectCreationErr struct {
 		Title string
 	}
+
+	GroupCreationErr struct {
+		Title string
+	}
 )
 
 func (e UserNotFoundErr) Error() string {
@@ -18,4 +22,8 @@ func (e UserNotFoundErr) Error() string {
 
 func (e ProjectCreationErr) Error() string {
 	return fmt.Sprintf("project creation failed: %s", e.Title)
+}
+
+func (e GroupCreationErr) Error() string {
+	return fmt.Sprintf("group creation failed: %s", e.Title)
 }

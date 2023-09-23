@@ -2,7 +2,9 @@ package repo
 
 import (
 	"database/sql"
-	"github.com/Gokhan-Uysal/ConfigBay.git/internal/core/domain"
+	"github.com/Gokhan-Uysal/ConfigBay.git/internal/core/domain/aggregate"
+	"github.com/Gokhan-Uysal/ConfigBay.git/internal/core/domain/entity"
+	"github.com/Gokhan-Uysal/ConfigBay.git/internal/core/domain/valueobject"
 	"github.com/Gokhan-Uysal/ConfigBay.git/internal/core/port"
 	"github.com/Gokhan-Uysal/ConfigBay.git/internal/lib/logger"
 )
@@ -21,7 +23,7 @@ func NewProjectRepo(db *sql.DB) (port.ProjectRepo, error) {
 	return &projectRepo{baseRepo: base}, nil
 }
 
-func (pr projectRepo) Save(project domain.Project) error {
+func (pr projectRepo) Save(project aggregate.Project) error {
 	var (
 		tx  *sql.Tx
 		err error
@@ -40,35 +42,29 @@ func (pr projectRepo) Save(project domain.Project) error {
 		return pr.baseRepo.CommitOrRollback(tx, err)
 	}
 
-	for _, group := range project.Groups() {
-		_, err = pr.AssignGroupToProject(tx, project.Id(), group)
+	for _, groupId := range project.Groups() {
+		_, err = pr.AssignGroup(tx, project.Id(), groupId)
 		if err != nil {
 			logger.ERR.Println(err)
 			return pr.baseRepo.CommitOrRollback(tx, err)
 		}
 
-		for _, role := range group.Roles() {
-			_, err = pr.AssignRoleToGroup(tx, group.Id(), role)
-			if err != nil {
-				logger.ERR.Println(err)
-				return pr.baseRepo.CommitOrRollback(tx, err)
-			}
+	}
+
+	for _, secret := range project.Secrets() {
+		_, err = pr.AddSecret(tx, project.Id(), secret)
+		if err != nil {
+			logger.ERR.Println(err)
+			return pr.baseRepo.CommitOrRollback(tx, err)
 		}
 
-		for _, user := range group.Users() {
-			_, err = pr.AssignUserToGroup(tx, group.Id(), user.Id())
-			if err != nil {
-				logger.ERR.Println(err)
-				return pr.baseRepo.CommitOrRollback(tx, err)
-			}
-		}
 	}
 
 	logger.DEBUG.Println("Project saved.")
 	return pr.baseRepo.CommitOrRollback(tx, err)
 }
 
-func (pr projectRepo) SaveProject(tx *sql.Tx, project domain.Project) (sql.Result, error) {
+func (pr projectRepo) SaveProject(tx *sql.Tx, project aggregate.Project) (sql.Result, error) {
 	var (
 		result sql.Result
 		err    error
@@ -87,10 +83,10 @@ func (pr projectRepo) SaveProject(tx *sql.Tx, project domain.Project) (sql.Resul
 	return result, nil
 }
 
-func (pr projectRepo) AssignGroupToProject(
+func (pr projectRepo) AssignGroup(
 	tx *sql.Tx,
-	projectId domain.ID,
-	group domain.Group,
+	projectId valueobject.ID,
+	groupId valueobject.ID,
 ) (sql.Result, error) {
 	var (
 		result sql.Result
@@ -99,8 +95,8 @@ func (pr projectRepo) AssignGroupToProject(
 
 	result, err = pr.baseRepo.Exec(
 		tx,
-		"INSERT INTO groups (id, title, project_id) VALUES ($1, $2, $3)",
-		group.Id(), group.Title(), projectId,
+		"INSERT INTO project_groups (project_id, group_id) VALUES ($1, $2)",
+		projectId, groupId,
 	)
 	if err != nil {
 		logger.ERR.Println(err)
@@ -110,10 +106,10 @@ func (pr projectRepo) AssignGroupToProject(
 	return result, nil
 }
 
-func (pr projectRepo) AssignUserToGroup(
+func (pr projectRepo) AddSecret(
 	tx *sql.Tx,
-	groupId domain.ID,
-	userId domain.ID,
+	projectId valueobject.ID,
+	secret entity.Secret,
 ) (sql.Result, error) {
 	var (
 		result sql.Result
@@ -122,8 +118,8 @@ func (pr projectRepo) AssignUserToGroup(
 
 	result, err = pr.baseRepo.Exec(
 		tx,
-		"INSERT INTO group_users (group_id, user_id) VALUES ($1, $2)",
-		groupId, userId,
+		"INSERT INTO secrets (id, key, value, project_id) VALUES ($1, $2, $3, $4)",
+		secret.Id(), secret.Key(), secret.Value(), projectId,
 	)
 	if err != nil {
 		logger.ERR.Println(err)
@@ -133,10 +129,33 @@ func (pr projectRepo) AssignUserToGroup(
 	return result, nil
 }
 
-func (pr projectRepo) AssignRoleToGroup(
+func (pr projectRepo) UpdateSecretValue(
+	tx *sql.Tx, projectId valueobject.ID, secret entity.Secret,
+) (sql.
+	Result,
+	error) {
+	var (
+		result sql.Result
+		err    error
+	)
+
+	result, err = pr.baseRepo.Exec(
+		tx,
+		"UPDATE secrets SET value=$1 WHERE id=$2 AND project_id=$3",
+		secret.Value(), secret.Id(), projectId,
+	)
+	if err != nil {
+		logger.ERR.Println(err)
+		return nil, err
+	}
+
+	return result, nil
+}
+
+func (pr projectRepo) DeleteSecret(
 	tx *sql.Tx,
-	groupId domain.ID,
-	role domain.Role,
+	projectId valueobject.ID,
+	secretId valueobject.ID,
 ) (sql.Result, error) {
 	var (
 		result sql.Result
@@ -145,8 +164,8 @@ func (pr projectRepo) AssignRoleToGroup(
 
 	result, err = pr.baseRepo.Exec(
 		tx,
-		"INSERT INTO group_roles (group_id, role) VALUES ($1, $2)",
-		groupId, role,
+		"DELETE FROM secrets WHERE id=$1 AND project_id=$2",
+		secretId, projectId,
 	)
 	if err != nil {
 		logger.ERR.Println(err)

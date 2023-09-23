@@ -32,10 +32,8 @@ DROP TABLE IF EXISTS groups CASCADE;
 CREATE TABLE groups (
     id UUID PRIMARY KEY,
     title VARCHAR(255) NOT NULL,
-    project_id UUID NOT NULL,
     created_at TIMESTAMP,
-    updated_at TIMESTAMP,
-    FOREIGN KEY (project_id) REFERENCES projects(id)
+    updated_at TIMESTAMP
 );
 
 DROP TABLE IF EXISTS roles CASCADE;
@@ -44,6 +42,15 @@ CREATE TABLE roles (
 );
 
 -- Many to many relations
+DROP TABLE IF EXISTS project_groups;
+CREATE TABLE project_groups (
+    project_id UUID NOT NULL,
+    group_id UUID NOT NULL,
+    PRIMARY KEY (project_id, group_id),
+    FOREIGN KEY (project_id) REFERENCES projects(id),
+    FOREIGN KEY (group_id) REFERENCES groups(id)
+);
+
 DROP TABLE IF EXISTS group_roles;
 CREATE TABLE group_roles (
     group_id UUID NOT NULL,

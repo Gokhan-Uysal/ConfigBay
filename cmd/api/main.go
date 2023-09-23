@@ -5,11 +5,14 @@ import (
 	"github.com/Gokhan-Uysal/ConfigBay.git/internal/adapter/db"
 	"github.com/Gokhan-Uysal/ConfigBay.git/internal/adapter/repo"
 	"github.com/Gokhan-Uysal/ConfigBay.git/internal/config"
-	"github.com/Gokhan-Uysal/ConfigBay.git/internal/core/domain"
+	"github.com/Gokhan-Uysal/ConfigBay.git/internal/core/domain/aggregate"
+	"github.com/Gokhan-Uysal/ConfigBay.git/internal/core/domain/valueobject"
 	"github.com/Gokhan-Uysal/ConfigBay.git/internal/core/port"
 	"github.com/Gokhan-Uysal/ConfigBay.git/internal/core/service"
+	"github.com/Gokhan-Uysal/ConfigBay.git/internal/lib/generator"
 	"github.com/Gokhan-Uysal/ConfigBay.git/internal/lib/loader"
 	"github.com/Gokhan-Uysal/ConfigBay.git/internal/lib/logger"
+	"github.com/Gokhan-Uysal/ConfigBay.git/internal/lib/mapper"
 	"os"
 )
 
@@ -22,7 +25,7 @@ var (
 
 func init() {
 	//Get JSON configs from folder
-	configs, err = loader.FilesToPaths(os.Getenv("CONF_PATH"))
+	configs, err = mapper.FilesToPaths(os.Getenv("CONF_PATH"))
 	if err != nil {
 		logger.ERR.Fatalln(err)
 	}
@@ -40,9 +43,9 @@ func init() {
 
 func main() {
 	var (
-		projectRepo port.ProjectRepo
-		userRepo    port.UserRepo
-
+		projectRepo    port.ProjectRepo
+		groupRepo      port.GroupRepo
+		userRepo       port.UserRepo
 		projectService port.ProjectService
 		err            error
 	)
@@ -57,6 +60,10 @@ func main() {
 	if err != nil {
 		logger.ERR.Fatalln(err)
 	}
+	groupRepo, err = repo.NewGroupRepo(DB)
+	if err != nil {
+		logger.ERR.Fatalln(err)
+	}
 	userRepo, err = repo.NewUserRepo(DB)
 	if err != nil {
 		logger.ERR.Fatalln(err)
@@ -65,26 +72,26 @@ func main() {
 	//Init services
 	projectService, err = service.NewProjectService(
 		projectRepo,
+		groupRepo,
 		userRepo,
 	)
 	if err != nil {
 		logger.ERR.Fatalln(err)
 	}
 
-	user := domain.NewUserBuilder(
-		domain.NewUUID(),
+	user := aggregate.NewUserBuilder(
+		generator.Uuid(),
 		"john",
-		domain.NewEmail("guysal20@ku.edu.tr"),
+		valueobject.NewEmail("guysal20@ku.edu.tr"),
 	).Build()
 
-	_, err = userRepo.Create(user)
+	_, err = userRepo.Save(user)
 	if err != nil {
 		logger.ERR.Fatalln(err)
 	}
 
-	project, err := projectService.Init(user.Id(), "Campus", "Admins")
+	_, err = projectService.Init(user.Id(), "Campus", "Admins")
 	if err != nil {
 		logger.ERR.Fatalln(err)
 	}
-	logger.DEBUG.Println(project.Groups())
 }

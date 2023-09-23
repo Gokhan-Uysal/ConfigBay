@@ -2,6 +2,7 @@ package main
 
 import (
 	"fmt"
+	"github.com/Gokhan-Uysal/ConfigBay.git/internal/lib/mapper"
 	"log"
 	"os"
 
@@ -18,7 +19,7 @@ func main() {
 	)
 
 	//Get JSON configs from folder
-	configs, err = loader.FilesToPaths(os.Getenv("CONF_PATH"))
+	configs, err = mapper.FilesToPaths(os.Getenv("CONF_PATH"))
 	if err != nil {
 		log.Fatalln(err)
 	}

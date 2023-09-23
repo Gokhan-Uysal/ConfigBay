@@ -2,6 +2,8 @@ package repo
 
 import (
 	"database/sql"
+	"github.com/Gokhan-Uysal/ConfigBay.git/internal/core/domain/aggregate"
+	"github.com/Gokhan-Uysal/ConfigBay.git/internal/core/domain/valueobject"
 	"github.com/Gokhan-Uysal/ConfigBay.git/internal/lib/logger"
 	"github.com/google/uuid"
 	"time"
@@ -25,7 +27,7 @@ func NewUserRepo(db *sql.DB) (port.UserRepo, error) {
 	return &userRepo{baseRepo: base}, nil
 }
 
-func (ur *userRepo) Create(user domain.User) (sql.Result, error) {
+func (ur *userRepo) Save(user aggregate.User) (sql.Result, error) {
 	var (
 		result sql.Result
 		err    error
@@ -43,10 +45,10 @@ func (ur *userRepo) Create(user domain.User) (sql.Result, error) {
 	return result, nil
 }
 
-func (ur *userRepo) GetById(id domain.ID) (domain.User, error) {
+func (ur *userRepo) GetById(id valueobject.ID) (aggregate.User, error) {
 	var (
 		rows  *sql.Rows
-		users []domain.User
+		users []aggregate.User
 		err   error
 	)
 
@@ -74,9 +76,9 @@ func (ur *userRepo) GetById(id domain.ID) (domain.User, error) {
 	return users[0], nil
 }
 
-func (ur *userRepo) mapUser(rows *sql.Rows) ([]domain.User, error) {
+func (ur *userRepo) mapUser(rows *sql.Rows) ([]aggregate.User, error) {
 	var (
-		users []domain.User
+		users []aggregate.User
 	)
 
 	defer ur.baseRepo.CloseRows(rows)
@@ -89,7 +91,7 @@ func (ur *userRepo) mapUser(rows *sql.Rows) ([]domain.User, error) {
 			active    bool
 			createdAt time.Time
 			updatedAt time.Time
-			user      domain.User
+			user      aggregate.User
 			err       error
 		)
 		err = rows.Scan(&id, &username, &email, &active, &createdAt, &updatedAt)
@@ -98,7 +100,7 @@ func (ur *userRepo) mapUser(rows *sql.Rows) ([]domain.User, error) {
 			return nil, err
 		}
 
-		user = domain.NewUserBuilder(id, username, domain.NewEmail(email)).
+		user = aggregate.NewUserBuilder(id, username, valueobject.NewEmail(email)).
 			Active(active).
 			CreatedAt(createdAt).
 			UpdatedAt(updatedAt).

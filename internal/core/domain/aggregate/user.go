@@ -1,6 +1,10 @@
-package domain
+package aggregate
 
-import "time"
+import (
+	"github.com/Gokhan-Uysal/ConfigBay.git/internal/core/domain"
+	"github.com/Gokhan-Uysal/ConfigBay.git/internal/core/domain/valueobject"
+	"time"
+)
 
 type (
 	// UserBuilder constructs a User entity
@@ -8,16 +12,15 @@ type (
 		Active(bool) UserBuilder
 		CreatedAt(time.Time) UserBuilder
 		UpdatedAt(time.Time) UserBuilder
-		Builder[User]
+		domain.Builder[User]
 	}
 
 	// User represents a user entity
 	User interface {
-		Id() ID
+		BaseAggregate
 		Username() string
-		Email() Email
+		Email() valueobject.Email
 		Active() bool
-		Timestamp
 	}
 
 	userBuilder struct {
@@ -25,17 +28,16 @@ type (
 	}
 
 	user struct {
-		id        ID
-		username  string
-		email     Email
-		active    bool
-		createdAt time.Time
-		updatedAt time.Time
+		*baseAggregate
+		username string
+		email    valueobject.Email
+		active   bool
 	}
 )
 
-func NewUserBuilder(id ID, username string, email Email) UserBuilder {
-	return &userBuilder{user{id: id, username: username, email: email}}
+func NewUserBuilder(id valueobject.ID, username string, email valueobject.Email) UserBuilder {
+	base := newBaseAggregate(id)
+	return &userBuilder{user{baseAggregate: base, username: username, email: email}}
 }
 
 func (ub *userBuilder) Active(active bool) UserBuilder {
@@ -55,35 +57,21 @@ func (ub *userBuilder) UpdatedAt(time time.Time) UserBuilder {
 
 func (ub *userBuilder) Build() User {
 	return &user{
-		id:        ub.id,
-		username:  ub.username,
-		email:     ub.email,
-		active:    ub.active,
-		createdAt: ub.createdAt,
-		updatedAt: ub.updatedAt,
+		baseAggregate: ub.baseAggregate,
+		username:      ub.username,
+		email:         ub.email,
+		active:        ub.active,
 	}
-}
-
-func (u *user) Id() ID {
-	return u.id
 }
 
 func (u *user) Username() string {
 	return u.username
 }
 
-func (u *user) Email() Email {
+func (u *user) Email() valueobject.Email {
 	return u.email
 }
 
 func (u *user) Active() bool {
 	return u.active
-}
-
-func (u *user) CreatedAt() time.Time {
-	return u.createdAt
-}
-
-func (u *user) UpdatedAt() time.Time {
-	return u.updatedAt
 }

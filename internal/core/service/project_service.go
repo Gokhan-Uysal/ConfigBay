@@ -2,8 +2,11 @@ package service
 
 import (
 	"github.com/Gokhan-Uysal/ConfigBay.git/internal/core/common"
-	"github.com/Gokhan-Uysal/ConfigBay.git/internal/core/domain"
+	"github.com/Gokhan-Uysal/ConfigBay.git/internal/core/domain/aggregate"
+	"github.com/Gokhan-Uysal/ConfigBay.git/internal/core/domain/entity"
+	"github.com/Gokhan-Uysal/ConfigBay.git/internal/core/domain/valueobject"
 	"github.com/Gokhan-Uysal/ConfigBay.git/internal/core/port"
+	"github.com/Gokhan-Uysal/ConfigBay.git/internal/lib/generator"
 	"github.com/Gokhan-Uysal/ConfigBay.git/internal/lib/logger"
 	"time"
 )
@@ -11,33 +14,38 @@ import (
 type (
 	projectService struct {
 		projectRepo port.ProjectRepo
+		groupRepo   port.GroupRepo
 		userRepo    port.UserRepo
 	}
 )
 
 func NewProjectService(
 	projectRepo port.ProjectRepo,
+	groupRepo port.GroupRepo,
 	userRepo port.UserRepo,
 ) (port.ProjectService, error) {
 	if projectRepo == nil {
 		return nil, common.NilPointerErr{Item: "project repository"}
 	}
+	if groupRepo == nil {
+		return nil, common.NilPointerErr{Item: "group repository"}
+	}
 	if userRepo == nil {
 		return nil, common.NilPointerErr{Item: "user repository"}
 	}
-	return &projectService{projectRepo: projectRepo, userRepo: userRepo}, nil
+	return &projectService{projectRepo: projectRepo, groupRepo: groupRepo, userRepo: userRepo}, nil
 }
 
 func (ps *projectService) Init(
-	userId domain.ID,
+	userId valueobject.ID,
 	projectTitle string,
 	groupTitle string,
-) (domain.Project,
+) (aggregate.Project,
 	error) {
 	var (
-		user       domain.User
-		adminGroup domain.Group
-		project    domain.Project
+		user       aggregate.User
+		adminGroup aggregate.Group
+		project    aggregate.Project
 		err        error
 	)
 
@@ -47,21 +55,27 @@ func (ps *projectService) Init(
 		return nil, UserNotFoundErr{Field: userId.String()}
 	}
 
-	adminGroup = domain.NewGroupBuilder(domain.NewUUID(), groupTitle).
+	adminGroup = aggregate.NewGroupBuilder(generator.Uuid(), groupTitle).
 		Roles(
-			domain.ManageGroups,
-			domain.ManageUsers,
-			domain.ReadSecrets,
-			domain.WriteSecrets,
-			domain.DeleteSecrets,
+			entity.ManageGroups,
+			entity.ManageUsers,
+			entity.ReadSecrets,
+			entity.WriteSecrets,
+			entity.DeleteSecrets,
 		).
-		Users(user).
+		Users(user.Id()).
 		Build()
 
-	project = domain.NewProjectBuilder(domain.NewUUID(), projectTitle).
+	err = ps.groupRepo.Save(adminGroup)
+	if err != nil {
+		logger.ERR.Printf("Failed to save group (%s): %v\n", groupTitle, err)
+		return nil, GroupCreationErr{Title: projectTitle}
+	}
+
+	project = aggregate.NewProjectBuilder(generator.Uuid(), projectTitle).
 		CreatedAt(time.Now()).
 		UpdatedAt(time.Now()).
-		Groups(adminGroup).
+		Groups(adminGroup.Id()).
 		Build()
 
 	err = ps.projectRepo.Save(project)

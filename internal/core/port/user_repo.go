@@ -2,12 +2,13 @@ package port
 
 import (
 	"database/sql"
-	"github.com/Gokhan-Uysal/ConfigBay.git/internal/core/domain"
+	"github.com/Gokhan-Uysal/ConfigBay.git/internal/core/domain/aggregate"
+	"github.com/Gokhan-Uysal/ConfigBay.git/internal/core/domain/valueobject"
 )
 
 type (
 	UserRepo interface {
-		Create(user domain.User) (sql.Result, error)
-		GetById(id domain.ID) (domain.User, error)
+		Save(user aggregate.User) (sql.Result, error)
+		GetById(id valueobject.ID) (aggregate.User, error)
 	}
 )
