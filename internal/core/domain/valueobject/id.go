@@ -16,8 +16,4 @@ type (
 	UserID interface {
 		ID
 	}
-
-	SecretID interface {
-		ID
-	}
 )

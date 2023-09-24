@@ -2,14 +2,11 @@ package entity
 
 import (
 	"github.com/Gokhan-Uysal/ConfigBay.git/internal/core/domain"
-	"github.com/Gokhan-Uysal/ConfigBay.git/internal/core/domain/valueobject"
 	"time"
 )
 
 type (
 	SecretBuilder interface {
-		Key(string) SecretBuilder
-		Value(string) SecretBuilder
 		Version(int) SecretBuilder
 		CreatedAt(time.Time) SecretBuilder
 		UpdatedAt(time.Time) SecretBuilder
@@ -17,7 +14,6 @@ type (
 	}
 
 	Secret interface {
-		Id() valueobject.SecretID
 		Key() string
 		Value() string
 		CreatedAt() time.Time
@@ -29,7 +25,6 @@ type (
 	}
 
 	secret struct {
-		id        valueobject.SecretID
 		key       string
 		value     string
 		version   int
@@ -38,18 +33,8 @@ type (
 	}
 )
 
-func NewSecretBuilder(id valueobject.SecretID) SecretBuilder {
-	return &secretBuilder{secret{id: id, version: 1}}
-}
-
-func (sb *secretBuilder) Key(k string) SecretBuilder {
-	sb.key = k
-	return sb
-}
-
-func (sb *secretBuilder) Value(v string) SecretBuilder {
-	sb.value = v
-	return sb
+func NewSecretBuilder(key, value string) SecretBuilder {
+	return &secretBuilder{secret{key: key, value: value, version: 1}}
 }
 
 func (sb *secretBuilder) Version(v int) SecretBuilder {
@@ -69,17 +54,12 @@ func (sb *secretBuilder) UpdatedAt(t time.Time) SecretBuilder {
 
 func (sb *secretBuilder) Build() Secret {
 	return &secret{
-		id:        sb.id,
 		key:       sb.key,
 		value:     sb.value,
 		version:   sb.version,
 		createdAt: sb.createdAt,
 		updatedAt: sb.updatedAt,
 	}
-}
-
-func (s *secret) Id() valueobject.SecretID {
-	return s.id
 }
 
 func (s *secret) Key() string {

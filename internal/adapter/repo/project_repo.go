@@ -96,6 +96,15 @@ func (pr projectRepo) Find(projectId valueobject.ProjectID) (aggregate.Project, 
 	return project, nil
 }
 
+func (pr projectRepo) Update(project aggregate.Project) error {
+	var (
+		tx *sql.Tx
+		_  error
+	)
+
+	return pr.baseRepo.CommitOrRollback(tx, nil)
+}
+
 func (pr projectRepo) SaveProject(tx *sql.Tx, project aggregate.Project) (sql.Result, error) {
 	var (
 		result sql.Result
@@ -197,8 +206,8 @@ func (pr projectRepo) AddSecret(
 
 	result, err = pr.baseRepo.Exec(
 		tx,
-		"INSERT INTO secrets (id, key, value, project_id) VALUES ($1, $2, $3, $4)",
-		secret.Id(), secret.Key(), secret.Value(), projectId,
+		"INSERT INTO secrets (project_id, key, value) VALUES ($1, $2, $3)",
+		projectId, secret.Key(), secret.Value(),
 	)
 	if err != nil {
 		return nil, err
@@ -216,7 +225,7 @@ func (pr projectRepo) FindSecrets(projectId valueobject.ProjectID) ([]entity.Sec
 
 	rows, err = pr.baseRepo.Query(
 		nil,
-		"SELECT id, key, value, version, created_at, updated_at FROM secrets WHERE project_id=$1",
+		"SELECT key, value, version, created_at, updated_at FROM secrets WHERE project_id=$1",
 		projectId,
 	)
 
@@ -238,10 +247,10 @@ func (pr projectRepo) FindSecrets(projectId valueobject.ProjectID) ([]entity.Sec
 }
 
 func (pr projectRepo) UpdateSecretValue(
-	tx *sql.Tx, projectId valueobject.ProjectID, secret entity.Secret,
-) (sql.
-	Result,
-	error) {
+	tx *sql.Tx,
+	projectId valueobject.ProjectID,
+	secret entity.Secret,
+) (sql.Result, error) {
 	var (
 		result sql.Result
 		err    error
@@ -249,8 +258,8 @@ func (pr projectRepo) UpdateSecretValue(
 
 	result, err = pr.baseRepo.Exec(
 		tx,
-		"UPDATE secrets SET value=$1 WHERE id=$2 AND project_id=$3",
-		secret.Value(), secret.Id(), projectId,
+		"UPDATE secrets SET value=$1 WHERE project_id=$2 AND key=$3",
+		secret.Value(), projectId, secret.Key(),
 	)
 	if err != nil {
 		return nil, err
@@ -262,7 +271,7 @@ func (pr projectRepo) UpdateSecretValue(
 func (pr projectRepo) DeleteSecret(
 	tx *sql.Tx,
 	projectId valueobject.ProjectID,
-	secretId valueobject.SecretID,
+	key string,
 ) (sql.Result, error) {
 	var (
 		result sql.Result
@@ -271,8 +280,8 @@ func (pr projectRepo) DeleteSecret(
 
 	result, err = pr.baseRepo.Exec(
 		tx,
-		"DELETE FROM secrets WHERE id=$1 AND project_id=$2",
-		secretId, projectId,
+		"DELETE FROM secrets WHERE project_id=$1 AND key=$2",
+		projectId, key,
 	)
 	if err != nil {
 		return nil, err
@@ -307,7 +316,6 @@ func (pr projectRepo) MapProject(s Scanner) (aggregate.Project, error) {
 func (pr projectRepo) MapSecret(s Scanner) (entity.Secret, error) {
 	var (
 		secret    entity.Secret
-		id        uuid.UUID
 		key       string
 		value     string
 		version   int
@@ -316,14 +324,12 @@ func (pr projectRepo) MapSecret(s Scanner) (entity.Secret, error) {
 		err       error
 	)
 
-	err = s.Scan(&id, &key, &value, &version, &createdAt, &updatedAt)
+	err = s.Scan(&key, &value, &version, &createdAt, &updatedAt)
 	if err != nil {
 		return nil, err
 	}
 
-	secret = entity.NewSecretBuilder(id).
-		Key(key).
-		Value(value).
+	secret = entity.NewSecretBuilder(key, value).
 		Version(version).
 		CreatedAt(createdAt).
 		UpdatedAt(updatedAt).
