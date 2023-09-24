@@ -22,7 +22,9 @@ type (
 		Secrets() []entity.Secret
 		Groups() []valueobject.ID
 		AddGroup(group valueobject.ID)
+		AddGroups(groups ...valueobject.ID)
 		AddSecret(secret entity.Secret)
+		AddSecrets(secrets ...entity.Secret)
 	}
 
 	projectBuilder struct {
@@ -87,6 +89,14 @@ func (p *project) AddGroup(group valueobject.ID) {
 	p.groups = append(p.groups, group)
 }
 
+func (p *project) AddGroups(groups ...valueobject.ID) {
+	p.groups = append(p.groups, groups...)
+}
+
 func (p *project) AddSecret(secret entity.Secret) {
 	p.secrets = append(p.secrets, secret)
+}
+
+func (p *project) AddSecrets(secrets ...entity.Secret) {
+	p.secrets = append(p.secrets, secrets...)
 }

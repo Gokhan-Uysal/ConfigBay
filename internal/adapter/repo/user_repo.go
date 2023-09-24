@@ -8,7 +8,6 @@ import (
 	"github.com/google/uuid"
 	"time"
 
-	"github.com/Gokhan-Uysal/ConfigBay.git/internal/core/domain"
 	"github.com/Gokhan-Uysal/ConfigBay.git/internal/core/port"
 )
 
@@ -47,12 +46,12 @@ func (ur *userRepo) Save(user aggregate.User) (sql.Result, error) {
 
 func (ur *userRepo) GetById(id valueobject.ID) (aggregate.User, error) {
 	var (
-		rows  *sql.Rows
-		users []aggregate.User
-		err   error
+		row  *sql.Row
+		user aggregate.User
+		err  error
 	)
 
-	rows, err = ur.baseRepo.Query(
+	row = ur.baseRepo.QueryRow(
 		nil,
 		"SELECT id, username, email, active, created_at, updated_at FROM users WHERE id=$1",
 		id.String(),
@@ -62,52 +61,36 @@ func (ur *userRepo) GetById(id valueobject.ID) (aggregate.User, error) {
 		return nil, err
 	}
 
-	users, err = ur.mapUser(rows)
+	user, err = ur.mapUser(row)
 	if err != nil {
 		logger.ERR.Println(err)
 		return nil, err
 	}
-	if len(users) == 0 {
-		err := domain.ItemNotFoundErr{Item: "user"}
-		logger.ERR.Println(err)
-		return nil, err
-	}
 
-	return users[0], nil
+	return user, nil
 }
 
-func (ur *userRepo) mapUser(rows *sql.Rows) ([]aggregate.User, error) {
+func (ur *userRepo) mapUser(s Scanner) (aggregate.User, error) {
 	var (
-		users []aggregate.User
+		id        uuid.UUID
+		username  string
+		email     string
+		active    bool
+		createdAt time.Time
+		updatedAt time.Time
+		user      aggregate.User
+		err       error
 	)
 
-	defer ur.baseRepo.CloseRows(rows)
-
-	for rows.Next() {
-		var (
-			id        uuid.UUID
-			username  string
-			email     string
-			active    bool
-			createdAt time.Time
-			updatedAt time.Time
-			user      aggregate.User
-			err       error
-		)
-		err = rows.Scan(&id, &username, &email, &active, &createdAt, &updatedAt)
-		if err != nil {
-			logger.ERR.Println(err)
-			return nil, err
-		}
-
-		user = aggregate.NewUserBuilder(id, username, valueobject.NewEmail(email)).
-			Active(active).
-			CreatedAt(createdAt).
-			UpdatedAt(updatedAt).
-			Build()
-
-		users = append(users, user)
+	err = s.Scan(&id, &username, &email, &active, &createdAt, &updatedAt)
+	if err != nil {
+		return nil, err
 	}
-
-	return users, nil
+	
+	user = aggregate.NewUserBuilder(id, username, valueobject.NewEmail(email)).
+		Active(active).
+		CreatedAt(createdAt).
+		UpdatedAt(updatedAt).
+		Build()
+	return user, nil
 }

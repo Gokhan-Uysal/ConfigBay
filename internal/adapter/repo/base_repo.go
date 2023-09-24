@@ -8,9 +8,15 @@ import (
 	"github.com/Gokhan-Uysal/ConfigBay.git/internal/lib/logger"
 )
 
-type baseRepo struct {
-	db *sql.DB
-}
+type (
+	Scanner interface {
+		Scan(dest ...any) error
+	}
+
+	baseRepo struct {
+		db *sql.DB
+	}
+)
 
 func newBaseRepo(db *sql.DB) (port.BaseRepo, error) {
 	if db == nil {

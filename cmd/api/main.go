@@ -81,7 +81,7 @@ func main() {
 	}
 
 	user := aggregate.NewUserBuilder(
-		generator.Uuid(),
+		generator.UUID(),
 		"john",
 		valueobject.NewEmail("guysal20@ku.edu.tr"),
 	).Build()
@@ -91,8 +91,10 @@ func main() {
 		logger.ERR.Fatalln(err)
 	}
 
-	_, err = projectService.Init(user.Id(), "Campus", "Admins")
+	project, err := projectService.Init(user.Id(), "Campus", "Admins")
 	if err != nil {
 		logger.ERR.Fatalln(err)
 	}
+
+	fmt.Println(project)
 }

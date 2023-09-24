@@ -36,7 +36,7 @@ func NewProjectService(
 	return &projectService{projectRepo: projectRepo, groupRepo: groupRepo, userRepo: userRepo}, nil
 }
 
-func (ps *projectService) Init(
+func (ps projectService) Init(
 	userId valueobject.ID,
 	projectTitle string,
 	groupTitle string,
@@ -55,7 +55,7 @@ func (ps *projectService) Init(
 		return nil, UserNotFoundErr{Field: userId.String()}
 	}
 
-	adminGroup = aggregate.NewGroupBuilder(generator.Uuid(), groupTitle).
+	adminGroup = aggregate.NewGroupBuilder(generator.UUID(), groupTitle).
 		Roles(
 			entity.ManageGroups,
 			entity.ManageUsers,
@@ -72,7 +72,7 @@ func (ps *projectService) Init(
 		return nil, GroupCreationErr{Title: projectTitle}
 	}
 
-	project = aggregate.NewProjectBuilder(generator.Uuid(), projectTitle).
+	project = aggregate.NewProjectBuilder(generator.UUID(), projectTitle).
 		CreatedAt(time.Now()).
 		UpdatedAt(time.Now()).
 		Groups(adminGroup.Id()).
@@ -82,6 +82,21 @@ func (ps *projectService) Init(
 	if err != nil {
 		logger.ERR.Printf("Failed to save project (%s): %v\n", projectTitle, err)
 		return nil, ProjectCreationErr{Title: projectTitle}
+	}
+
+	return project, nil
+}
+
+func (ps projectService) Find(projectId valueobject.ID) (aggregate.Project, error) {
+	var (
+		project aggregate.Project
+		err     error
+	)
+
+	project, err = ps.projectRepo.Find(projectId)
+	if err != nil {
+		logger.ERR.Printf("Failed to find project (%s): %v\n", projectId.String(), err)
+		return nil, ProjectNotFoundErr{Id: projectId.String()}
 	}
 
 	return project, nil

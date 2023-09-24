@@ -3,6 +3,10 @@ package service
 import "fmt"
 
 type (
+	ProjectNotFoundErr struct {
+		Id string
+	}
+
 	UserNotFoundErr struct {
 		Field string
 	}
@@ -15,6 +19,10 @@ type (
 		Title string
 	}
 )
+
+func (e ProjectNotFoundErr) Error() string {
+	return fmt.Sprintf("project not found with %s", e.Id)
+}
 
 func (e UserNotFoundErr) Error() string {
 	return fmt.Sprintf("user not found with %s", e.Field)

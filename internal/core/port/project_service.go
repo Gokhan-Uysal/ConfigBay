@@ -13,5 +13,6 @@ type (
 			groupTitle string,
 		) (aggregate.Project,
 			error)
+		Find(projectId valueobject.ID) (aggregate.Project, error)
 	}
 )

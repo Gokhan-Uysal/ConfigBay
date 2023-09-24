@@ -10,6 +10,7 @@ type (
 	SecretBuilder interface {
 		Key(string) SecretBuilder
 		Value(string) SecretBuilder
+		Version(int) SecretBuilder
 		CreatedAt(time.Time) SecretBuilder
 		UpdatedAt(time.Time) SecretBuilder
 		domain.Builder[Secret]
@@ -31,32 +32,38 @@ type (
 		id        valueobject.ID
 		key       string
 		value     string
+		version   int
 		createdAt time.Time
 		updatedAt time.Time
 	}
 )
 
-func NewSecretBuilder(id valueobject.ID, key string, value string) SecretBuilder {
-	return &secretBuilder{secret{id: id, key: key, value: value}}
+func NewSecretBuilder(id valueobject.ID) SecretBuilder {
+	return &secretBuilder{secret{id: id, version: 1}}
 }
 
-func (sb *secretBuilder) Key(key string) SecretBuilder {
-	sb.key = key
+func (sb *secretBuilder) Key(k string) SecretBuilder {
+	sb.key = k
 	return sb
 }
 
-func (sb *secretBuilder) Value(value string) SecretBuilder {
-	sb.value = value
+func (sb *secretBuilder) Value(v string) SecretBuilder {
+	sb.value = v
 	return sb
 }
 
-func (sb *secretBuilder) CreatedAt(time time.Time) SecretBuilder {
-	sb.createdAt = time
+func (sb *secretBuilder) Version(v int) SecretBuilder {
+	sb.version = v
 	return sb
 }
 
-func (sb *secretBuilder) UpdatedAt(time time.Time) SecretBuilder {
-	sb.updatedAt = time
+func (sb *secretBuilder) CreatedAt(t time.Time) SecretBuilder {
+	sb.createdAt = t
+	return sb
+}
+
+func (sb *secretBuilder) UpdatedAt(t time.Time) SecretBuilder {
+	sb.updatedAt = t
 	return sb
 }
 
@@ -65,6 +72,7 @@ func (sb *secretBuilder) Build() Secret {
 		id:        sb.id,
 		key:       sb.key,
 		value:     sb.value,
+		version:   sb.version,
 		createdAt: sb.createdAt,
 		updatedAt: sb.updatedAt,
 	}
