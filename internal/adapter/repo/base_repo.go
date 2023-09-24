@@ -2,8 +2,8 @@ package repo
 
 import (
 	"database/sql"
+	error2 "github.com/Gokhan-Uysal/ConfigBay.git/internal/core/domain/common/error"
 
-	"github.com/Gokhan-Uysal/ConfigBay.git/internal/core/common"
 	"github.com/Gokhan-Uysal/ConfigBay.git/internal/core/port"
 	"github.com/Gokhan-Uysal/ConfigBay.git/internal/lib/logger"
 )
@@ -20,7 +20,7 @@ type (
 
 func newBaseRepo(db *sql.DB) (port.BaseRepo, error) {
 	if db == nil {
-		return nil, common.NilPointerErr{Item: "db"}
+		return nil, error2.NilPointerErr{Item: "db"}
 	}
 	return &baseRepo{db: db}, nil
 }

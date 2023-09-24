@@ -1,9 +1,10 @@
 package aggregate
 
 import (
-	"github.com/Gokhan-Uysal/ConfigBay.git/internal/core/domain"
+	"github.com/Gokhan-Uysal/ConfigBay.git/internal/core/domain/common/model"
 	"github.com/Gokhan-Uysal/ConfigBay.git/internal/core/domain/entity"
 	"github.com/Gokhan-Uysal/ConfigBay.git/internal/core/domain/valueobject"
+	valueobject2 "github.com/Gokhan-Uysal/ConfigBay.git/internal/core/domain/valueobject"
 	"time"
 )
 
@@ -13,11 +14,11 @@ type (
 		Groups(...valueobject.GroupID) ProjectBuilder
 		CreatedAt(time.Time) ProjectBuilder
 		UpdatedAt(time.Time) ProjectBuilder
-		domain.Builder[Project]
+		model.Builder[Project]
 	}
 
 	Project interface {
-		BaseAggregate
+		model.BaseAggregate
 		Title() string
 		Secrets() []entity.Secret
 		Groups() []valueobject.GroupID
@@ -39,7 +40,7 @@ type (
 	}
 )
 
-func NewProjectBuilder(id valueobject.ProjectID, title string) ProjectBuilder {
+func NewProjectBuilder(id valueobject2.ProjectID, title string) ProjectBuilder {
 	base := newBaseAggregate(id)
 	return &projectBuilder{project: project{baseAggregate: base, title: title}}
 }

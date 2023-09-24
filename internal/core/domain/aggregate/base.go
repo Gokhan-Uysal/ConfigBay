@@ -6,12 +6,6 @@ import (
 )
 
 type (
-	BaseAggregate interface {
-		Id() valueobject.ID
-		CreatedAt() time.Time
-		UpdatedAt() time.Time
-	}
-
 	baseAggregate struct {
 		id        valueobject.ID
 		createdAt time.Time

@@ -1,7 +1,7 @@
 package entity
 
 import (
-	"github.com/Gokhan-Uysal/ConfigBay.git/internal/core/domain"
+	"github.com/Gokhan-Uysal/ConfigBay.git/internal/core/domain/common/model"
 	"time"
 )
 
@@ -10,7 +10,7 @@ type (
 		Version(int) SecretBuilder
 		CreatedAt(time.Time) SecretBuilder
 		UpdatedAt(time.Time) SecretBuilder
-		domain.Builder[Secret]
+		model.Builder[Secret]
 	}
 
 	Secret interface {

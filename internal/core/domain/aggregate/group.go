@@ -1,7 +1,7 @@
 package aggregate
 
 import (
-	"github.com/Gokhan-Uysal/ConfigBay.git/internal/core/domain"
+	"github.com/Gokhan-Uysal/ConfigBay.git/internal/core/domain/common/model"
 	"github.com/Gokhan-Uysal/ConfigBay.git/internal/core/domain/entity"
 	"github.com/Gokhan-Uysal/ConfigBay.git/internal/core/domain/valueobject"
 	"time"
@@ -13,11 +13,11 @@ type (
 		Roles(...entity.Role) GroupBuilder
 		CreatedAt(time.Time) GroupBuilder
 		UpdatedAt(time.Time) GroupBuilder
-		domain.Builder[Group]
+		model.Builder[Group]
 	}
 
 	Group interface {
-		BaseAggregate
+		model.BaseAggregate
 		Title() string
 		Users() []valueobject.UserID
 		Roles() []entity.Role

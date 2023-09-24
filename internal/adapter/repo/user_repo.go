@@ -4,6 +4,7 @@ import (
 	"database/sql"
 	"github.com/Gokhan-Uysal/ConfigBay.git/internal/core/domain/aggregate"
 	"github.com/Gokhan-Uysal/ConfigBay.git/internal/core/domain/valueobject"
+	valueobject2 "github.com/Gokhan-Uysal/ConfigBay.git/internal/core/domain/valueobject"
 	"github.com/Gokhan-Uysal/ConfigBay.git/internal/lib/logger"
 	"github.com/google/uuid"
 	"time"
@@ -87,7 +88,7 @@ func (ur *userRepo) mapUser(s Scanner) (aggregate.User, error) {
 		return nil, err
 	}
 
-	user = aggregate.NewUserBuilder(id, username, valueobject.NewEmail(email)).
+	user = aggregate.NewUserBuilder(id, username, valueobject2.NewEmail(email)).
 		Active(active).
 		CreatedAt(createdAt).
 		UpdatedAt(updatedAt).

@@ -1,8 +1,8 @@
 package aggregate
 
 import (
-	"github.com/Gokhan-Uysal/ConfigBay.git/internal/core/domain"
-	"github.com/Gokhan-Uysal/ConfigBay.git/internal/core/domain/valueobject"
+	"github.com/Gokhan-Uysal/ConfigBay.git/internal/core/domain/common/model"
+	valueobject2 "github.com/Gokhan-Uysal/ConfigBay.git/internal/core/domain/valueobject"
 	"time"
 )
 
@@ -12,14 +12,14 @@ type (
 		Active(bool) UserBuilder
 		CreatedAt(time.Time) UserBuilder
 		UpdatedAt(time.Time) UserBuilder
-		domain.Builder[User]
+		model.Builder[User]
 	}
 
 	// User represents a user entity
 	User interface {
-		BaseAggregate
+		model.BaseAggregate
 		Username() string
-		Email() valueobject.Email
+		Email() valueobject2.Email
 		Active() bool
 	}
 
@@ -30,12 +30,12 @@ type (
 	user struct {
 		*baseAggregate
 		username string
-		email    valueobject.Email
+		email    valueobject2.Email
 		active   bool
 	}
 )
 
-func NewUserBuilder(id valueobject.ID, username string, email valueobject.Email) UserBuilder {
+func NewUserBuilder(id valueobject2.ID, username string, email valueobject2.Email) UserBuilder {
 	base := newBaseAggregate(id)
 	return &userBuilder{user{baseAggregate: base, username: username, email: email}}
 }
@@ -68,7 +68,7 @@ func (u *user) Username() string {
 	return u.username
 }
 
-func (u *user) Email() valueobject.Email {
+func (u *user) Email() valueobject2.Email {
 	return u.email
 }
 
