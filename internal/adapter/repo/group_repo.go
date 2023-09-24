@@ -83,7 +83,7 @@ func (gr groupRepo) SaveGroup(tx *sql.Tx, group aggregate.Group) (sql.Result, er
 	return result, nil
 }
 
-func (gr groupRepo) AssignUser(tx *sql.Tx, groupId, userId valueobject.ID) (sql.Result, error) {
+func (gr groupRepo) AssignUser(tx *sql.Tx, groupId, userId valueobject.UserID) (sql.Result, error) {
 	var (
 		result sql.Result
 		err    error
@@ -102,7 +102,7 @@ func (gr groupRepo) AssignUser(tx *sql.Tx, groupId, userId valueobject.ID) (sql.
 	return result, nil
 }
 
-func (gr groupRepo) DropUser(tx *sql.Tx, groupId, userId valueobject.ID) (sql.Result, error) {
+func (gr groupRepo) DropUser(tx *sql.Tx, groupId, userId valueobject.UserID) (sql.Result, error) {
 	var (
 		result sql.Result
 		err    error
@@ -122,7 +122,7 @@ func (gr groupRepo) DropUser(tx *sql.Tx, groupId, userId valueobject.ID) (sql.Re
 }
 
 func (gr groupRepo) AssignRole(
-	tx *sql.Tx, groupId valueobject.ID, role entity.Role,
+	tx *sql.Tx, groupId valueobject.GroupID, role entity.Role,
 ) (sql.Result, error) {
 	var (
 		result sql.Result
@@ -144,7 +144,7 @@ func (gr groupRepo) AssignRole(
 
 func (pr projectRepo) DropRole(
 	tx *sql.Tx,
-	groupId valueobject.ID,
+	groupId valueobject.GroupID,
 	role entity.Role,
 ) (sql.Result, error) {
 	var (

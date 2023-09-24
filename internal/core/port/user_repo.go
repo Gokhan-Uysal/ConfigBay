@@ -9,6 +9,6 @@ import (
 type (
 	UserRepo interface {
 		Save(user aggregate.User) (sql.Result, error)
-		GetById(id valueobject.ID) (aggregate.User, error)
+		Find(id valueobject.UserID) (aggregate.User, error)
 	}
 )

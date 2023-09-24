@@ -64,11 +64,11 @@ func (pr projectRepo) Save(project aggregate.Project) error {
 	return pr.baseRepo.CommitOrRollback(tx, err)
 }
 
-func (pr projectRepo) Find(projectId valueobject.ID) (aggregate.Project, error) {
+func (pr projectRepo) Find(projectId valueobject.ProjectID) (aggregate.Project, error) {
 	var (
 		project  aggregate.Project
 		secrets  []entity.Secret
-		groupIds []valueobject.ID
+		groupIds []valueobject.GroupID
 		err      error
 	)
 
@@ -114,7 +114,7 @@ func (pr projectRepo) SaveProject(tx *sql.Tx, project aggregate.Project) (sql.Re
 	return result, nil
 }
 
-func (pr projectRepo) FindProject(projectId valueobject.ID) (aggregate.Project, error) {
+func (pr projectRepo) FindProject(projectId valueobject.ProjectID) (aggregate.Project, error) {
 	var (
 		project aggregate.Project
 		row     *sql.Row
@@ -133,8 +133,8 @@ func (pr projectRepo) FindProject(projectId valueobject.ID) (aggregate.Project, 
 
 func (pr projectRepo) AssignGroup(
 	tx *sql.Tx,
-	projectId valueobject.ID,
-	groupId valueobject.ID,
+	projectId valueobject.ProjectID,
+	groupId valueobject.GroupID,
 ) (sql.Result, error) {
 	var (
 		result sql.Result
@@ -153,11 +153,11 @@ func (pr projectRepo) AssignGroup(
 	return result, nil
 }
 
-func (pr projectRepo) FindGroups(projectId valueobject.ID) ([]valueobject.ID, error) {
+func (pr projectRepo) FindGroups(projectId valueobject.ProjectID) ([]valueobject.GroupID, error) {
 	var (
-		projectIds []valueobject.ID
-		rows       *sql.Rows
-		err        error
+		groupIds []valueobject.GroupID
+		rows     *sql.Rows
+		err      error
 	)
 
 	rows, err = pr.baseRepo.Query(
@@ -178,16 +178,16 @@ func (pr projectRepo) FindGroups(projectId valueobject.ID) ([]valueobject.ID, er
 			return nil, err
 		}
 
-		projectIds = append(projectIds, id)
+		groupIds = append(groupIds, id)
 	}
 
 	defer pr.baseRepo.CloseRows(rows)
-	return projectIds, nil
+	return groupIds, nil
 }
 
 func (pr projectRepo) AddSecret(
 	tx *sql.Tx,
-	projectId valueobject.ID,
+	projectId valueobject.ProjectID,
 	secret entity.Secret,
 ) (sql.Result, error) {
 	var (
@@ -207,7 +207,7 @@ func (pr projectRepo) AddSecret(
 	return result, nil
 }
 
-func (pr projectRepo) FindSecrets(projectId valueobject.ID) ([]entity.Secret, error) {
+func (pr projectRepo) FindSecrets(projectId valueobject.ProjectID) ([]entity.Secret, error) {
 	var (
 		rows    *sql.Rows
 		secrets []entity.Secret
@@ -238,7 +238,7 @@ func (pr projectRepo) FindSecrets(projectId valueobject.ID) ([]entity.Secret, er
 }
 
 func (pr projectRepo) UpdateSecretValue(
-	tx *sql.Tx, projectId valueobject.ID, secret entity.Secret,
+	tx *sql.Tx, projectId valueobject.ProjectID, secret entity.Secret,
 ) (sql.
 	Result,
 	error) {
@@ -261,8 +261,8 @@ func (pr projectRepo) UpdateSecretValue(
 
 func (pr projectRepo) DeleteSecret(
 	tx *sql.Tx,
-	projectId valueobject.ID,
-	secretId valueobject.ID,
+	projectId valueobject.ProjectID,
+	secretId valueobject.SecretID,
 ) (sql.Result, error) {
 	var (
 		result sql.Result

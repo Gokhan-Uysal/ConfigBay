@@ -49,7 +49,7 @@ func (ps projectService) Init(
 		err        error
 	)
 
-	user, err = ps.userRepo.GetById(userId)
+	user, err = ps.userRepo.Find(userId)
 	if err != nil {
 		logger.ERR.Printf("Failed to get user by ID (%s): %v\n", userId.String(), err)
 		return nil, UserNotFoundErr{Field: userId.String()}

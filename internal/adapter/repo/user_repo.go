@@ -44,7 +44,7 @@ func (ur *userRepo) Save(user aggregate.User) (sql.Result, error) {
 	return result, nil
 }
 
-func (ur *userRepo) GetById(id valueobject.ID) (aggregate.User, error) {
+func (ur *userRepo) Find(userId valueobject.UserID) (aggregate.User, error) {
 	var (
 		row  *sql.Row
 		user aggregate.User
@@ -54,7 +54,7 @@ func (ur *userRepo) GetById(id valueobject.ID) (aggregate.User, error) {
 	row = ur.baseRepo.QueryRow(
 		nil,
 		"SELECT id, username, email, active, created_at, updated_at FROM users WHERE id=$1",
-		id.String(),
+		userId.String(),
 	)
 	if err != nil {
 		logger.ERR.Println(err)
@@ -86,7 +86,7 @@ func (ur *userRepo) mapUser(s Scanner) (aggregate.User, error) {
 	if err != nil {
 		return nil, err
 	}
-	
+
 	user = aggregate.NewUserBuilder(id, username, valueobject.NewEmail(email)).
 		Active(active).
 		CreatedAt(createdAt).

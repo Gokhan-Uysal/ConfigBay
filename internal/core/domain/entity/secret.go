@@ -17,7 +17,7 @@ type (
 	}
 
 	Secret interface {
-		Id() valueobject.ID
+		Id() valueobject.SecretID
 		Key() string
 		Value() string
 		CreatedAt() time.Time
@@ -29,7 +29,7 @@ type (
 	}
 
 	secret struct {
-		id        valueobject.ID
+		id        valueobject.SecretID
 		key       string
 		value     string
 		version   int
@@ -38,7 +38,7 @@ type (
 	}
 )
 
-func NewSecretBuilder(id valueobject.ID) SecretBuilder {
+func NewSecretBuilder(id valueobject.SecretID) SecretBuilder {
 	return &secretBuilder{secret{id: id, version: 1}}
 }
 
@@ -78,7 +78,7 @@ func (sb *secretBuilder) Build() Secret {
 	}
 }
 
-func (s *secret) Id() valueobject.ID {
+func (s *secret) Id() valueobject.SecretID {
 	return s.id
 }
 

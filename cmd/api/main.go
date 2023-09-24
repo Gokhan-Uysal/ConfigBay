@@ -85,7 +85,7 @@ func main() {
 		"john",
 		valueobject.NewEmail("guysal20@ku.edu.tr"),
 	).Build()
-
+	
 	_, err = userRepo.Save(user)
 	if err != nil {
 		logger.ERR.Fatalln(err)

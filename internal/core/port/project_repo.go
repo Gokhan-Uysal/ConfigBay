@@ -8,6 +8,6 @@ import (
 type (
 	ProjectRepo interface {
 		Save(project aggregate.Project) error
-		Find(projectId valueobject.ID) (aggregate.Project, error)
+		Find(projectId valueobject.ProjectID) (aggregate.Project, error)
 	}
 )

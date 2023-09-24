@@ -10,7 +10,7 @@ import (
 type (
 	ProjectBuilder interface {
 		Secrets(...entity.Secret) ProjectBuilder
-		Groups(...valueobject.ID) ProjectBuilder
+		Groups(...valueobject.GroupID) ProjectBuilder
 		CreatedAt(time.Time) ProjectBuilder
 		UpdatedAt(time.Time) ProjectBuilder
 		domain.Builder[Project]
@@ -20,9 +20,9 @@ type (
 		BaseAggregate
 		Title() string
 		Secrets() []entity.Secret
-		Groups() []valueobject.ID
-		AddGroup(group valueobject.ID)
-		AddGroups(groups ...valueobject.ID)
+		Groups() []valueobject.GroupID
+		AddGroup(group valueobject.GroupID)
+		AddGroups(groups ...valueobject.GroupID)
 		AddSecret(secret entity.Secret)
 		AddSecrets(secrets ...entity.Secret)
 	}
@@ -35,11 +35,11 @@ type (
 		*baseAggregate
 		title   string
 		secrets []entity.Secret
-		groups  []valueobject.ID
+		groups  []valueobject.GroupID
 	}
 )
 
-func NewProjectBuilder(id valueobject.ID, title string) ProjectBuilder {
+func NewProjectBuilder(id valueobject.ProjectID, title string) ProjectBuilder {
 	base := newBaseAggregate(id)
 	return &projectBuilder{project: project{baseAggregate: base, title: title}}
 }
@@ -49,7 +49,7 @@ func (pb *projectBuilder) Secrets(secrets ...entity.Secret) ProjectBuilder {
 	return pb
 }
 
-func (pb *projectBuilder) Groups(groups ...valueobject.ID) ProjectBuilder {
+func (pb *projectBuilder) Groups(groups ...valueobject.GroupID) ProjectBuilder {
 	pb.groups = groups
 	return pb
 }
@@ -77,7 +77,7 @@ func (p *project) Title() string {
 	return p.title
 }
 
-func (p *project) Groups() []valueobject.ID {
+func (p *project) Groups() []valueobject.GroupID {
 	return p.groups
 }
 
@@ -85,11 +85,11 @@ func (p *project) Secrets() []entity.Secret {
 	return p.secrets
 }
 
-func (p *project) AddGroup(group valueobject.ID) {
+func (p *project) AddGroup(group valueobject.GroupID) {
 	p.groups = append(p.groups, group)
 }
 
-func (p *project) AddGroups(groups ...valueobject.ID) {
+func (p *project) AddGroups(groups ...valueobject.GroupID) {
 	p.groups = append(p.groups, groups...)
 }
 
