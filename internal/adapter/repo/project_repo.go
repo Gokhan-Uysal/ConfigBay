@@ -7,6 +7,8 @@ import (
 	"github.com/Gokhan-Uysal/ConfigBay.git/internal/core/domain/valueobject"
 	"github.com/Gokhan-Uysal/ConfigBay.git/internal/core/port"
 	"github.com/Gokhan-Uysal/ConfigBay.git/internal/lib/logger"
+	"github.com/google/uuid"
+	"time"
 )
 
 type (
@@ -48,7 +50,6 @@ func (pr projectRepo) Save(project aggregate.Project) error {
 			logger.ERR.Println(err)
 			return pr.baseRepo.CommitOrRollback(tx, err)
 		}
-
 	}
 
 	for _, secret := range project.Secrets() {
@@ -57,11 +58,51 @@ func (pr projectRepo) Save(project aggregate.Project) error {
 			logger.ERR.Println(err)
 			return pr.baseRepo.CommitOrRollback(tx, err)
 		}
-
 	}
 
 	logger.DEBUG.Println("Project saved.")
 	return pr.baseRepo.CommitOrRollback(tx, err)
+}
+
+func (pr projectRepo) Find(projectId valueobject.ProjectID) (aggregate.Project, error) {
+	var (
+		project  aggregate.Project
+		secrets  []entity.Secret
+		groupIds []valueobject.GroupID
+		err      error
+	)
+
+	project, err = pr.FindProject(projectId)
+	if err != nil {
+		logger.ERR.Println(err)
+		return nil, err
+	}
+
+	secrets, err = pr.FindSecrets(projectId)
+	if err != nil {
+		logger.ERR.Println(err)
+		return nil, err
+	}
+
+	groupIds, err = pr.FindGroups(projectId)
+	if err != nil {
+		logger.ERR.Println(err)
+		return nil, err
+	}
+
+	project.AddGroups(groupIds...)
+	project.AddSecrets(secrets...)
+
+	return project, nil
+}
+
+func (pr projectRepo) Update(project aggregate.Project) error {
+	var (
+		tx *sql.Tx
+		_  error
+	)
+
+	return pr.baseRepo.CommitOrRollback(tx, nil)
 }
 
 func (pr projectRepo) SaveProject(tx *sql.Tx, project aggregate.Project) (sql.Result, error) {
@@ -76,17 +117,33 @@ func (pr projectRepo) SaveProject(tx *sql.Tx, project aggregate.Project) (sql.Re
 		project.Id(), project.Title(),
 	)
 	if err != nil {
-		logger.ERR.Println(err)
 		return nil, err
 	}
 
 	return result, nil
 }
 
+func (pr projectRepo) FindProject(projectId valueobject.ProjectID) (aggregate.Project, error) {
+	var (
+		project aggregate.Project
+		row     *sql.Row
+		err     error
+	)
+
+	row = pr.baseRepo.QueryRow(nil, "SELECT * FROM projects WHERE id=$1", projectId)
+
+	project, err = pr.MapProject(row)
+	if err != nil {
+		return nil, err
+	}
+
+	return project, nil
+}
+
 func (pr projectRepo) AssignGroup(
 	tx *sql.Tx,
-	projectId valueobject.ID,
-	groupId valueobject.ID,
+	projectId valueobject.ProjectID,
+	groupId valueobject.GroupID,
 ) (sql.Result, error) {
 	var (
 		result sql.Result
@@ -99,16 +156,47 @@ func (pr projectRepo) AssignGroup(
 		projectId, groupId,
 	)
 	if err != nil {
-		logger.ERR.Println(err)
 		return nil, err
 	}
 
 	return result, nil
 }
 
+func (pr projectRepo) FindGroups(projectId valueobject.ProjectID) ([]valueobject.GroupID, error) {
+	var (
+		groupIds []valueobject.GroupID
+		rows     *sql.Rows
+		err      error
+	)
+
+	rows, err = pr.baseRepo.Query(
+		nil, "SELECT group_id FROM project_groups WHERE project_id=$1",
+		projectId,
+	)
+	if err != nil {
+		return nil, err
+	}
+
+	for rows.Next() {
+		var (
+			id uuid.UUID
+		)
+
+		err = rows.Scan(&id)
+		if err != nil {
+			return nil, err
+		}
+
+		groupIds = append(groupIds, id)
+	}
+
+	defer pr.baseRepo.CloseRows(rows)
+	return groupIds, nil
+}
+
 func (pr projectRepo) AddSecret(
 	tx *sql.Tx,
-	projectId valueobject.ID,
+	projectId valueobject.ProjectID,
 	secret entity.Secret,
 ) (sql.Result, error) {
 	var (
@@ -118,44 +206,50 @@ func (pr projectRepo) AddSecret(
 
 	result, err = pr.baseRepo.Exec(
 		tx,
-		"INSERT INTO secrets (id, key, value, project_id) VALUES ($1, $2, $3, $4)",
-		secret.Id(), secret.Key(), secret.Value(), projectId,
+		"INSERT INTO secrets (project_id, key, value) VALUES ($1, $2, $3)",
+		projectId, secret.Key(), secret.Value(),
 	)
 	if err != nil {
-		logger.ERR.Println(err)
 		return nil, err
 	}
 
 	return result, nil
+}
+
+func (pr projectRepo) FindSecrets(projectId valueobject.ProjectID) ([]entity.Secret, error) {
+	var (
+		rows    *sql.Rows
+		secrets []entity.Secret
+		err     error
+	)
+
+	rows, err = pr.baseRepo.Query(
+		nil,
+		"SELECT key, value, version, created_at, updated_at FROM secrets WHERE project_id=$1",
+		projectId,
+	)
+
+	for rows.Next() {
+		var (
+			secret entity.Secret
+		)
+
+		secret, err = pr.MapSecret(rows)
+		if err != nil {
+			return nil, err
+		}
+
+		secrets = append(secrets, secret)
+	}
+
+	defer pr.baseRepo.CloseRows(rows)
+	return secrets, nil
 }
 
 func (pr projectRepo) UpdateSecretValue(
-	tx *sql.Tx, projectId valueobject.ID, secret entity.Secret,
-) (sql.
-	Result,
-	error) {
-	var (
-		result sql.Result
-		err    error
-	)
-
-	result, err = pr.baseRepo.Exec(
-		tx,
-		"UPDATE secrets SET value=$1 WHERE id=$2 AND project_id=$3",
-		secret.Value(), secret.Id(), projectId,
-	)
-	if err != nil {
-		logger.ERR.Println(err)
-		return nil, err
-	}
-
-	return result, nil
-}
-
-func (pr projectRepo) DeleteSecret(
 	tx *sql.Tx,
-	projectId valueobject.ID,
-	secretId valueobject.ID,
+	projectId valueobject.ProjectID,
+	secret entity.Secret,
 ) (sql.Result, error) {
 	var (
 		result sql.Result
@@ -164,13 +258,82 @@ func (pr projectRepo) DeleteSecret(
 
 	result, err = pr.baseRepo.Exec(
 		tx,
-		"DELETE FROM secrets WHERE id=$1 AND project_id=$2",
-		secretId, projectId,
+		"UPDATE secrets SET value=$1 WHERE project_id=$2 AND key=$3",
+		secret.Value(), projectId, secret.Key(),
 	)
 	if err != nil {
-		logger.ERR.Println(err)
 		return nil, err
 	}
 
 	return result, nil
+}
+
+func (pr projectRepo) DeleteSecret(
+	tx *sql.Tx,
+	projectId valueobject.ProjectID,
+	key string,
+) (sql.Result, error) {
+	var (
+		result sql.Result
+		err    error
+	)
+
+	result, err = pr.baseRepo.Exec(
+		tx,
+		"DELETE FROM secrets WHERE project_id=$1 AND key=$2",
+		projectId, key,
+	)
+	if err != nil {
+		return nil, err
+	}
+
+	return result, nil
+}
+
+func (pr projectRepo) MapProject(s Scanner) (aggregate.Project, error) {
+	var (
+		project   aggregate.Project
+		id        uuid.UUID
+		title     string
+		createdAt time.Time
+		updatedAt time.Time
+		err       error
+	)
+
+	err = s.Scan(&id, &title, &createdAt, &updatedAt)
+	if err != nil {
+		return nil, err
+	}
+
+	project = aggregate.NewProjectBuilder(id, title).
+		CreatedAt(createdAt).
+		UpdatedAt(updatedAt).
+		Build()
+
+	return project, err
+}
+
+func (pr projectRepo) MapSecret(s Scanner) (entity.Secret, error) {
+	var (
+		secret    entity.Secret
+		key       string
+		value     string
+		version   int
+		createdAt time.Time
+		updatedAt time.Time
+		err       error
+	)
+
+	err = s.Scan(&key, &value, &version, &createdAt, &updatedAt)
+	if err != nil {
+		return nil, err
+	}
+
+	secret = entity.NewSecretBuilder(key, value).
+		Version(version).
+		CreatedAt(createdAt).
+		UpdatedAt(updatedAt).
+		Build()
+
+	return secret, nil
 }

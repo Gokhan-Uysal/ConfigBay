@@ -1,10 +1,9 @@
 package parser
 
 import (
-	"github.com/Gokhan-Uysal/ConfigBay.git/internal/core/domain/valueobject"
 	"github.com/google/uuid"
 )
 
-func ToUuid(id string) (valueobject.ID, error) {
+func ToUUID(id string) (uuid.UUID, error) {
 	return uuid.Parse(id)
 }

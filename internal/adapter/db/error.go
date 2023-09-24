@@ -10,8 +10,8 @@ type UniqueKeyValidationErr struct {
 	Key string
 }
 
-type QueryError struct {
-	Reason string
+type MappingErr struct {
+	Item string
 }
 
 func (e ItemNotFoundErr) Error() string {
@@ -22,6 +22,6 @@ func (e UniqueKeyValidationErr) Error() string {
 	return fmt.Sprintf("unique key validation: %s", e.Key)
 }
 
-func (e QueryError) Error() string {
-	return fmt.Sprintf("query failed: %s", e.Reason)
+func (e MappingErr) Error() string {
+	return fmt.Sprintf("mapping failed: %s", e.Item)
 }

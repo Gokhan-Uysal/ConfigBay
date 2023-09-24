@@ -1,7 +1,7 @@
 package valueobject
 
 import (
-	"github.com/Gokhan-Uysal/ConfigBay.git/internal/core/domain"
+	error2 "github.com/Gokhan-Uysal/ConfigBay.git/internal/core/domain/common/error"
 	"regexp"
 )
 
@@ -23,7 +23,7 @@ func MustNewEmail(data string) (Email, error) {
 		return nil, err
 	}
 	if !re.MatchString(data) {
-		return nil, domain.ValidationErr{Info: "email"}
+		return nil, error2.ValidationErr{Info: "email"}
 	}
 
 	return &email{data: data}, nil

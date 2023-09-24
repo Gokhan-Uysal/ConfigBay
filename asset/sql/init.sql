@@ -1,6 +1,6 @@
 DROP TABLE IF EXISTS projects CASCADE;
 CREATE TABLE projects (
-    id UUID PRIMARY KEY NOT NULL,
+    id UUID NOT NULL PRIMARY KEY,
     title VARCHAR(255),
     created_at TIMESTAMP,
     updated_at TIMESTAMP
@@ -8,19 +8,19 @@ CREATE TABLE projects (
 
 DROP TABLE IF EXISTS secrets CASCADE;
 CREATE TABLE secrets (
-    id UUID PRIMARY KEY,
+    project_id UUID NOT NULL,
     key VARCHAR(255) NOT NULL,
     value TEXT NOT NULL,
     version INT DEFAULT 1,
-    project_id UUID NOT NULL,
     created_at TIMESTAMP,
     updated_at TIMESTAMP,
+    PRIMARY KEY (project_id, key),
     FOREIGN KEY (project_id) REFERENCES projects(id)
 );
 
 DROP TABLE IF EXISTS users CASCADE;
 CREATE TABLE users (
-    id UUID PRIMARY KEY,
+    id UUID NOT NULL PRIMARY KEY,
     username VARCHAR(50) NOT NULL,
     email VARCHAR(255) NOT NULL,
     active BOOLEAN DEFAULT TRUE,
@@ -30,7 +30,7 @@ CREATE TABLE users (
 
 DROP TABLE IF EXISTS groups CASCADE;
 CREATE TABLE groups (
-    id UUID PRIMARY KEY,
+    id UUID NOT NULL PRIMARY KEY,
     title VARCHAR(255) NOT NULL,
     created_at TIMESTAMP,
     updated_at TIMESTAMP

@@ -1,7 +1,7 @@
 package aggregate
 
 import (
-	"github.com/Gokhan-Uysal/ConfigBay.git/internal/core/domain"
+	"github.com/Gokhan-Uysal/ConfigBay.git/internal/core/domain/common/model"
 	"github.com/Gokhan-Uysal/ConfigBay.git/internal/core/domain/entity"
 	"github.com/Gokhan-Uysal/ConfigBay.git/internal/core/domain/valueobject"
 	"time"
@@ -9,19 +9,19 @@ import (
 
 type (
 	GroupBuilder interface {
-		Users(...valueobject.ID) GroupBuilder
+		Users(...valueobject.UserID) GroupBuilder
 		Roles(...entity.Role) GroupBuilder
 		CreatedAt(time.Time) GroupBuilder
 		UpdatedAt(time.Time) GroupBuilder
-		domain.Builder[Group]
+		model.Builder[Group]
 	}
 
 	Group interface {
-		BaseAggregate
+		model.BaseAggregate
 		Title() string
-		Users() []valueobject.ID
+		Users() []valueobject.UserID
 		Roles() []entity.Role
-		AddUser(user valueobject.ID)
+		AddUser(user valueobject.UserID)
 	}
 
 	groupBuilder struct {
@@ -31,17 +31,17 @@ type (
 	group struct {
 		*baseAggregate
 		title string
-		users []valueobject.ID
+		users []valueobject.UserID
 		roles []entity.Role
 	}
 )
 
-func NewGroupBuilder(id valueobject.ID, title string) GroupBuilder {
+func NewGroupBuilder(id valueobject.GroupID, title string) GroupBuilder {
 	base := newBaseAggregate(id)
 	return &groupBuilder{group{baseAggregate: base, title: title}}
 }
 
-func (gb *groupBuilder) Users(users ...valueobject.ID) GroupBuilder {
+func (gb *groupBuilder) Users(users ...valueobject.UserID) GroupBuilder {
 	gb.users = users
 	return gb
 }
@@ -74,7 +74,7 @@ func (g *group) Title() string {
 	return g.title
 }
 
-func (g *group) Users() []valueobject.ID {
+func (g *group) Users() []valueobject.UserID {
 	return g.users
 }
 
@@ -82,7 +82,7 @@ func (g *group) Roles() []entity.Role {
 	return g.roles
 }
 
-func (g *group) AddUser(user valueobject.ID) {
+func (g *group) AddUser(user valueobject.UserID) {
 	g.users = append(g.users, user)
 }
 
