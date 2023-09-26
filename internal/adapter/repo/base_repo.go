@@ -2,7 +2,7 @@ package repo
 
 import (
 	"database/sql"
-	error2 "github.com/Gokhan-Uysal/ConfigBay.git/internal/core/domain/common/error"
+	error2 "github.com/Gokhan-Uysal/ConfigBay.git/internal/core/domain/common/errorx"
 
 	"github.com/Gokhan-Uysal/ConfigBay.git/internal/core/port"
 	"github.com/Gokhan-Uysal/ConfigBay.git/internal/lib/logger"

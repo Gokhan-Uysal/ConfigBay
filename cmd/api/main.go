@@ -46,6 +46,7 @@ func main() {
 		projectRepo    port.ProjectRepo
 		groupRepo      port.GroupRepo
 		userRepo       port.UserRepo
+		authService    port.AuthService
 		projectService port.ProjectService
 		err            error
 	)
@@ -71,10 +72,15 @@ func main() {
 	}
 
 	//Init services
+	authService, err = service.NewAuthService()
+	if err != nil {
+		logger.ERR.Fatalln(err)
+	}
 	projectService, err = service.NewProjectService(
 		projectRepo,
 		groupRepo,
 		userRepo,
+		authService,
 	)
 	if err != nil {
 		logger.ERR.Fatalln(err)

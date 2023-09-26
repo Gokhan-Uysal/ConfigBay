@@ -8,7 +8,7 @@ import (
 
 type (
 	UserRepo interface {
-		Save(user aggregate.User) (sql.Result, error)
-		Find(id valueobject.UserID) (aggregate.User, error)
+		Save(aggregate.User) (sql.Result, error)
+		Find(valueobject.UserID) (aggregate.User, error)
 	}
 )

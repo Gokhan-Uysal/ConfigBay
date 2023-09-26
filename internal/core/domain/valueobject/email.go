@@ -1,7 +1,7 @@
 package valueobject
 
 import (
-	error2 "github.com/Gokhan-Uysal/ConfigBay.git/internal/core/domain/common/error"
+	error2 "github.com/Gokhan-Uysal/ConfigBay.git/internal/core/domain/common/errorx"
 	"regexp"
 )
 

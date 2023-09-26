@@ -1,19 +1,19 @@
 package aggregate
 
 import (
-	"github.com/Gokhan-Uysal/ConfigBay.git/internal/core/domain/valueobject"
+	"github.com/Gokhan-Uysal/ConfigBay.git/internal/core/domain/common/model"
 	"time"
 )
 
 type (
 	baseAggregate struct {
-		id        valueobject.ID
+		id        model.ID
 		createdAt time.Time
 		updatedAt time.Time
 	}
 )
 
-func newBaseAggregate(id valueobject.ID) *baseAggregate {
+func newBaseAggregate(id model.ID) *baseAggregate {
 	return &baseAggregate{
 		id:        id,
 		createdAt: time.Now(),
@@ -21,7 +21,7 @@ func newBaseAggregate(id valueobject.ID) *baseAggregate {
 	}
 }
 
-func (b *baseAggregate) Id() valueobject.ID {
+func (b *baseAggregate) Id() model.ID {
 	return b.id
 }
 

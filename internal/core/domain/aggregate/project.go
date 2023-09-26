@@ -4,7 +4,6 @@ import (
 	"github.com/Gokhan-Uysal/ConfigBay.git/internal/core/domain/common/model"
 	"github.com/Gokhan-Uysal/ConfigBay.git/internal/core/domain/entity"
 	"github.com/Gokhan-Uysal/ConfigBay.git/internal/core/domain/valueobject"
-	valueobject2 "github.com/Gokhan-Uysal/ConfigBay.git/internal/core/domain/valueobject"
 	"time"
 )
 
@@ -22,9 +21,7 @@ type (
 		Title() string
 		Secrets() []entity.Secret
 		Groups() []valueobject.GroupID
-		AddGroup(group valueobject.GroupID)
 		AddGroups(groups ...valueobject.GroupID)
-		AddSecret(secret entity.Secret)
 		AddSecrets(secrets ...entity.Secret)
 	}
 
@@ -40,7 +37,7 @@ type (
 	}
 )
 
-func NewProjectBuilder(id valueobject2.ProjectID, title string) ProjectBuilder {
+func NewProjectBuilder(id valueobject.ProjectID, title string) ProjectBuilder {
 	base := newBaseAggregate(id)
 	return &projectBuilder{project: project{baseAggregate: base, title: title}}
 }
@@ -86,16 +83,8 @@ func (p *project) Secrets() []entity.Secret {
 	return p.secrets
 }
 
-func (p *project) AddGroup(group valueobject.GroupID) {
-	p.groups = append(p.groups, group)
-}
-
 func (p *project) AddGroups(groups ...valueobject.GroupID) {
 	p.groups = append(p.groups, groups...)
-}
-
-func (p *project) AddSecret(secret entity.Secret) {
-	p.secrets = append(p.secrets, secret)
 }
 
 func (p *project) AddSecrets(secrets ...entity.Secret) {

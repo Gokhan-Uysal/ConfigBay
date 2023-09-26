@@ -35,7 +35,7 @@ type (
 	}
 )
 
-func NewUserBuilder(id valueobject2.ID, username string, email valueobject2.Email) UserBuilder {
+func NewUserBuilder(id model.ID, username string, email valueobject2.Email) UserBuilder {
 	base := newBaseAggregate(id)
 	return &userBuilder{user{baseAggregate: base, username: username, email: email}}
 }

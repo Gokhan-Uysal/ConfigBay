@@ -1,9 +1,10 @@
 DROP TABLE IF EXISTS projects CASCADE;
 CREATE TABLE projects (
-    id UUID NOT NULL PRIMARY KEY,
+    id UUID DEFAULT gen_random_uuid(),
     title VARCHAR(255),
     created_at TIMESTAMP,
-    updated_at TIMESTAMP
+    updated_at TIMESTAMP,
+    PRIMARY KEY (id)
 );
 
 DROP TABLE IF EXISTS secrets CASCADE;
@@ -20,25 +21,28 @@ CREATE TABLE secrets (
 
 DROP TABLE IF EXISTS users CASCADE;
 CREATE TABLE users (
-    id UUID NOT NULL PRIMARY KEY,
+    id UUID DEFAULT gen_random_uuid(),
     username VARCHAR(50) NOT NULL,
     email VARCHAR(255) NOT NULL,
     active BOOLEAN DEFAULT TRUE,
     created_at TIMESTAMP,
-    updated_at TIMESTAMP
+    updated_at TIMESTAMP,
+    PRIMARY KEY (id)
 );
 
 DROP TABLE IF EXISTS groups CASCADE;
 CREATE TABLE groups (
-    id UUID NOT NULL PRIMARY KEY,
+    id UUID DEFAULT gen_random_uuid(),
     title VARCHAR(255) NOT NULL,
     created_at TIMESTAMP,
-    updated_at TIMESTAMP
+    updated_at TIMESTAMP,
+    PRIMARY KEY (id)
 );
 
 DROP TABLE IF EXISTS roles CASCADE;
 CREATE TABLE roles (
-    name VARCHAR(255) UNIQUE
+    name VARCHAR(255),
+    PRIMARY KEY (name)
 );
 
 -- Many to many relations
@@ -77,6 +81,7 @@ CREATE TABLE user_tokens (
 );
 
 INSERT INTO roles (name) VALUES
+     ('read-project'),
      ('manage-users'),
      ('manage-groups'),
      ('read-secrets'),

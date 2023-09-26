@@ -8,11 +8,14 @@ import (
 type (
 	ProjectService interface {
 		Init(
-			userId valueobject.ID,
-			projectTitle string,
-			groupTitle string,
+			valueobject.UserID,
+			string,
+			string,
 		) (aggregate.Project,
 			error)
-		Find(projectId valueobject.ID) (aggregate.Project, error)
+		Find(
+			valueobject.ProjectID,
+			valueobject.UserID,
+		) (aggregate.Project, error)
 	}
 )

@@ -4,6 +4,7 @@ import (
 	"github.com/Gokhan-Uysal/ConfigBay.git/internal/core/domain/common/model"
 	"github.com/Gokhan-Uysal/ConfigBay.git/internal/core/domain/entity"
 	"github.com/Gokhan-Uysal/ConfigBay.git/internal/core/domain/valueobject"
+	"slices"
 	"time"
 )
 
@@ -17,11 +18,15 @@ type (
 	}
 
 	Group interface {
-		model.BaseAggregate
+		Id() valueobject.GroupID
 		Title() string
 		Users() []valueobject.UserID
 		Roles() []entity.Role
-		AddUser(user valueobject.UserID)
+		AddRoles(...entity.Role)
+		AddUsers(...valueobject.UserID)
+		HasRole(entity.Role) bool
+		CreatedAt() time.Time
+		UpdatedAt() time.Time
 	}
 
 	groupBuilder struct {
@@ -29,16 +34,17 @@ type (
 	}
 
 	group struct {
-		*baseAggregate
-		title string
-		users []valueobject.UserID
-		roles []entity.Role
+		id        valueobject.GroupID
+		title     string
+		users     []valueobject.UserID
+		roles     []entity.Role
+		createdAt time.Time
+		updatedAt time.Time
 	}
 )
 
 func NewGroupBuilder(id valueobject.GroupID, title string) GroupBuilder {
-	base := newBaseAggregate(id)
-	return &groupBuilder{group{baseAggregate: base, title: title}}
+	return &groupBuilder{group{id: id, title: title}}
 }
 
 func (gb *groupBuilder) Users(users ...valueobject.UserID) GroupBuilder {
@@ -63,11 +69,17 @@ func (gb *groupBuilder) UpdatedAt(time time.Time) GroupBuilder {
 
 func (gb *groupBuilder) Build() Group {
 	return &group{
-		baseAggregate: gb.baseAggregate,
-		title:         gb.title,
-		users:         gb.users,
-		roles:         gb.roles,
+		id:        gb.id,
+		title:     gb.title,
+		users:     gb.users,
+		roles:     gb.roles,
+		createdAt: gb.createdAt,
+		updatedAt: gb.updatedAt,
 	}
+}
+
+func (g *group) Id() valueobject.GroupID {
+	return g.id
 }
 
 func (g *group) Title() string {
@@ -82,10 +94,22 @@ func (g *group) Roles() []entity.Role {
 	return g.roles
 }
 
-func (g *group) AddUser(user valueobject.UserID) {
-	g.users = append(g.users, user)
+func (g *group) AddUsers(users ...valueobject.UserID) {
+	g.users = append(g.users, users...)
 }
 
-func (g *group) AddRole(role entity.Role) {
-	g.roles = append(g.roles, role)
+func (g *group) AddRoles(roles ...entity.Role) {
+	g.roles = append(g.roles, roles...)
+}
+
+func (g *group) HasRole(role entity.Role) bool {
+	return slices.Contains(g.roles, role)
+}
+
+func (g *group) CreatedAt() time.Time {
+	return g.createdAt
+}
+
+func (g *group) UpdatedAt() time.Time {
+	return g.updatedAt
 }

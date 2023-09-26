@@ -1,0 +1,38 @@
+{
+  "id": "ebdda4d9-fedf-4496-9b65-4717f706627a",
+  "title": "Campus",
+  "groups": [
+    {
+      "id": "eac01463-d8fe-4bd7-8ece-d9674ceb79a6",
+      "title": "Admins",
+      "users": [
+          {
+            "id": "3aa4c223-5762-4f0e-8f52-a75978b67fc8",
+            "username": "john",
+            "email": "guysal20@ku.edu.tr",
+            "tokens": [
+              {
+                "accessToken":"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiaWF0IjoxNTE2MjM5MDIyfQ.SflKxwRJSMeKKF2QT4fwpMeJf36POk6yJV_adQssw5c"
+              }
+            ],
+            "active": true,
+            "created_at": "2023-09-24 21:40:46.662495",
+            "updated_at": "2023-09-24 21:40:46.662495"
+          }
+      ],
+      "created_at": "2023-09-24 21:40:46.676792",
+      "updated_at": "2023-09-24 21:40:46.676792"
+    }
+  ],
+  "secrets": [
+    {
+      "key": "POSTGRES_PASSWORD",
+      "value": "postgres",
+      "version": 1,
+      "created_at": "2023-09-24 21:44:19.773041",
+      "updated_at": "2023-09-24 21:44:19.773041"
+    }
+  ],
+  "created_at": "2023-09-24 21:40:46.681839",
+  "updated_at": "2023-09-24 21:40:46.681839"
+}
