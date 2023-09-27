@@ -44,14 +44,6 @@ func (pr projectRepo) Save(project aggregate.Project) error {
 		return pr.baseRepo.CommitOrRollback(tx, err)
 	}
 
-	for _, groupId := range project.Groups() {
-		_, err = pr.AssignGroup(tx, project.Id(), groupId)
-		if err != nil {
-			logger.ERR.Println(err)
-			return pr.baseRepo.CommitOrRollback(tx, err)
-		}
-	}
-
 	for _, secret := range project.Secrets() {
 		_, err = pr.AddSecret(tx, project.Id(), secret)
 		if err != nil {
@@ -140,28 +132,6 @@ func (pr projectRepo) FindProject(projectId valueobject.ProjectID) (aggregate.Pr
 	return project, nil
 }
 
-func (pr projectRepo) AssignGroup(
-	tx *sql.Tx,
-	projectId valueobject.ProjectID,
-	groupId valueobject.GroupID,
-) (sql.Result, error) {
-	var (
-		result sql.Result
-		err    error
-	)
-
-	result, err = pr.baseRepo.Exec(
-		tx,
-		"INSERT INTO project_groups (project_id, group_id) VALUES ($1, $2)",
-		projectId, groupId,
-	)
-	if err != nil {
-		return nil, err
-	}
-
-	return result, nil
-}
-
 func (pr projectRepo) FindGroups(projectId valueobject.ProjectID) ([]valueobject.GroupID, error) {
 	var (
 		groupIds []valueobject.GroupID
@@ -170,7 +140,7 @@ func (pr projectRepo) FindGroups(projectId valueobject.ProjectID) ([]valueobject
 	)
 
 	rows, err = pr.baseRepo.Query(
-		nil, "SELECT group_id FROM project_groups WHERE project_id=$1",
+		nil, "SELECT id FROM groups WHERE project_id=$1",
 		projectId,
 	)
 	if err != nil {
@@ -336,4 +306,47 @@ func (pr projectRepo) MapSecret(s Scanner) (entity.Secret, error) {
 		Build()
 
 	return secret, nil
+}
+
+func (pr projectRepo) MapGroup(s Scanner) (aggregate.Group, error) {
+	var (
+		id        uuid.UUID
+		title     string
+		createdAt time.Time
+		updatedAt time.Time
+		group     aggregate.Group
+		err       error
+	)
+
+	err = s.Scan(&id, &title, &createdAt, &updatedAt)
+	if err != nil {
+		return nil, err
+	}
+
+	group = aggregate.NewGroupBuilder(id, title).
+		CreatedAt(createdAt).
+		UpdatedAt(updatedAt).
+		Build()
+
+	return group, nil
+}
+
+func (pr projectRepo) MapRole(s Scanner) (valueobject.Role, error) {
+	var (
+		name string
+		role valueobject.Role
+		err  error
+	)
+
+	err = s.Scan(&name)
+	if err != nil {
+		return "", err
+	}
+
+	role, err = valueobject.ToRoleName(name)
+	if err != nil {
+		return "", err
+	}
+
+	return role, nil
 }

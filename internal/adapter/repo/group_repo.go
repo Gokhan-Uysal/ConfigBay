@@ -3,7 +3,6 @@ package repo
 import (
 	"database/sql"
 	"github.com/Gokhan-Uysal/ConfigBay.git/internal/core/domain/aggregate"
-	"github.com/Gokhan-Uysal/ConfigBay.git/internal/core/domain/entity"
 	"github.com/Gokhan-Uysal/ConfigBay.git/internal/core/domain/valueobject"
 	"github.com/Gokhan-Uysal/ConfigBay.git/internal/core/port"
 	"github.com/Gokhan-Uysal/ConfigBay.git/internal/lib/logger"
@@ -26,7 +25,7 @@ func NewGroupRepo(db *sql.DB) (port.GroupRepo, error) {
 	return &groupRepo{baseRepo: base}, nil
 }
 
-func (gr groupRepo) Save(group aggregate.Group) error {
+func (gr groupRepo) Save(group aggregate.Group, projectId valueobject.ProjectID) error {
 	var (
 		tx  *sql.Tx
 		err error
@@ -39,7 +38,7 @@ func (gr groupRepo) Save(group aggregate.Group) error {
 		return gr.baseRepo.CommitOrRollback(tx, err)
 	}
 
-	_, err = gr.SaveGroup(tx, group)
+	_, err = gr.SaveGroup(tx, group, projectId)
 	if err != nil {
 		logger.ERR.Println(err)
 		return gr.baseRepo.CommitOrRollback(tx, err)
@@ -69,7 +68,7 @@ func (gr groupRepo) Save(group aggregate.Group) error {
 func (gr groupRepo) Find(groupId valueobject.GroupID) (aggregate.Group, error) {
 	var (
 		group   aggregate.Group
-		roles   []entity.Role
+		roles   []valueobject.Role
 		userIds []valueobject.UserID
 		err     error
 	)
@@ -101,6 +100,7 @@ func (gr groupRepo) Find(groupId valueobject.GroupID) (aggregate.Group, error) {
 func (gr groupRepo) SaveGroup(
 	tx *sql.Tx,
 	group aggregate.Group,
+	projectId valueobject.ProjectID,
 ) (sql.Result, error) {
 	var (
 		result sql.Result
@@ -109,8 +109,8 @@ func (gr groupRepo) SaveGroup(
 
 	result, err = gr.baseRepo.Exec(
 		tx,
-		"INSERT INTO groups (id, title) VALUES ($1, $2)",
-		group.Id(), group.Title(),
+		"INSERT INTO groups (id, title, project_id) VALUES ($1, $2, $3)",
+		group.Id(), group.Title(), projectId,
 	)
 	if err != nil {
 		logger.ERR.Println(err)
@@ -215,7 +215,7 @@ func (gr groupRepo) DropUser(tx *sql.Tx, groupId, userId valueobject.UserID) (sq
 }
 
 func (gr groupRepo) AssignRole(
-	tx *sql.Tx, groupId valueobject.GroupID, role entity.Role,
+	tx *sql.Tx, groupId valueobject.GroupID, role valueobject.Role,
 ) (sql.Result, error) {
 	var (
 		result sql.Result
@@ -235,10 +235,10 @@ func (gr groupRepo) AssignRole(
 	return result, nil
 }
 
-func (gr groupRepo) FinRoleByName(name entity.Role) (entity.Role, error) {
+func (gr groupRepo) FinRoleByName(name valueobject.Role) (valueobject.Role, error) {
 	var (
 		row  *sql.Row
-		role entity.Role
+		role valueobject.Role
 		err  error
 	)
 
@@ -252,9 +252,9 @@ func (gr groupRepo) FinRoleByName(name entity.Role) (entity.Role, error) {
 	return role, nil
 }
 
-func (gr groupRepo) FindRolesByGroup(groupId valueobject.GroupID) ([]entity.Role, error) {
+func (gr groupRepo) FindRolesByGroup(groupId valueobject.GroupID) ([]valueobject.Role, error) {
 	var (
-		roles []entity.Role
+		roles []valueobject.Role
 		rows  *sql.Rows
 		err   error
 	)
@@ -271,7 +271,7 @@ func (gr groupRepo) FindRolesByGroup(groupId valueobject.GroupID) ([]entity.Role
 
 	for rows.Next() {
 		var (
-			role entity.Role
+			role valueobject.Role
 		)
 
 		role, err = gr.MapRole(rows)
@@ -290,7 +290,7 @@ func (gr groupRepo) FindRolesByGroup(groupId valueobject.GroupID) ([]entity.Role
 func (gr groupRepo) DropRole(
 	tx *sql.Tx,
 	groupId valueobject.GroupID,
-	role entity.Role,
+	role valueobject.Role,
 ) (sql.Result, error) {
 	var (
 		result sql.Result
@@ -333,10 +333,10 @@ func (gr groupRepo) MapGroup(s Scanner) (aggregate.Group, error) {
 	return group, nil
 }
 
-func (gr groupRepo) MapRole(s Scanner) (entity.Role, error) {
+func (gr groupRepo) MapRole(s Scanner) (valueobject.Role, error) {
 	var (
 		name string
-		role entity.Role
+		role valueobject.Role
 		err  error
 	)
 
@@ -345,7 +345,7 @@ func (gr groupRepo) MapRole(s Scanner) (entity.Role, error) {
 		return "", err
 	}
 
-	role, err = entity.ToRoleName(name)
+	role, err = valueobject.ToRoleName(name)
 	if err != nil {
 		return "", err
 	}

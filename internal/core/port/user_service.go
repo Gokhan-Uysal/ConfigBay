@@ -6,8 +6,7 @@ import (
 )
 
 type (
-	GroupRepo interface {
-		Save(group aggregate.Group, projectId valueobject.ProjectID) error
-		Find(valueobject.GroupID) (aggregate.Group, error)
+	UserService interface {
+		Find(valueobject.UserID) (aggregate.User, error)
 	}
 )

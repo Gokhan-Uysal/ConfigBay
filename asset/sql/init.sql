@@ -9,13 +9,15 @@ CREATE TABLE projects (
 
 DROP TABLE IF EXISTS secrets CASCADE;
 CREATE TABLE secrets (
-    project_id UUID NOT NULL,
+    id UUID DEFAULT gen_random_uuid(),
     key VARCHAR(255) NOT NULL,
     value TEXT NOT NULL,
     version INT DEFAULT 1,
+    project_id UUID NOT NULL,
     created_at TIMESTAMP,
     updated_at TIMESTAMP,
-    PRIMARY KEY (project_id, key),
+    PRIMARY KEY (id),
+    UNIQUE (project_id, key),
     FOREIGN KEY (project_id) REFERENCES projects(id)
 );
 
@@ -34,9 +36,11 @@ DROP TABLE IF EXISTS groups CASCADE;
 CREATE TABLE groups (
     id UUID DEFAULT gen_random_uuid(),
     title VARCHAR(255) NOT NULL,
+    project_id UUID NOT NULL,
     created_at TIMESTAMP,
     updated_at TIMESTAMP,
-    PRIMARY KEY (id)
+    PRIMARY KEY (id),
+    FOREIGN KEY (project_id) REFERENCES projects(id)
 );
 
 DROP TABLE IF EXISTS roles CASCADE;
@@ -46,15 +50,6 @@ CREATE TABLE roles (
 );
 
 -- Many to many relations
-DROP TABLE IF EXISTS project_groups;
-CREATE TABLE project_groups (
-    project_id UUID NOT NULL,
-    group_id UUID NOT NULL,
-    PRIMARY KEY (project_id, group_id),
-    FOREIGN KEY (project_id) REFERENCES projects(id),
-    FOREIGN KEY (group_id) REFERENCES groups(id)
-);
-
 DROP TABLE IF EXISTS group_roles;
 CREATE TABLE group_roles (
     group_id UUID NOT NULL,

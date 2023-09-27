@@ -2,7 +2,6 @@ package aggregate
 
 import (
 	"github.com/Gokhan-Uysal/ConfigBay.git/internal/core/domain/common/model"
-	"github.com/Gokhan-Uysal/ConfigBay.git/internal/core/domain/entity"
 	"github.com/Gokhan-Uysal/ConfigBay.git/internal/core/domain/valueobject"
 	"slices"
 	"time"
@@ -11,7 +10,7 @@ import (
 type (
 	GroupBuilder interface {
 		Users(...valueobject.UserID) GroupBuilder
-		Roles(...entity.Role) GroupBuilder
+		Roles(...valueobject.Role) GroupBuilder
 		CreatedAt(time.Time) GroupBuilder
 		UpdatedAt(time.Time) GroupBuilder
 		model.Builder[Group]
@@ -21,12 +20,12 @@ type (
 		Id() valueobject.GroupID
 		Title() string
 		Users() []valueobject.UserID
-		Roles() []entity.Role
-		AddRoles(...entity.Role)
-		AddUsers(...valueobject.UserID)
-		HasRole(entity.Role) bool
+		Roles() []valueobject.Role
 		CreatedAt() time.Time
 		UpdatedAt() time.Time
+		AddRoles(...valueobject.Role)
+		AddUsers(...valueobject.UserID)
+		HasRole(valueobject.Role) bool
 	}
 
 	groupBuilder struct {
@@ -37,7 +36,7 @@ type (
 		id        valueobject.GroupID
 		title     string
 		users     []valueobject.UserID
-		roles     []entity.Role
+		roles     []valueobject.Role
 		createdAt time.Time
 		updatedAt time.Time
 	}
@@ -52,7 +51,7 @@ func (gb *groupBuilder) Users(users ...valueobject.UserID) GroupBuilder {
 	return gb
 }
 
-func (gb *groupBuilder) Roles(roles ...entity.Role) GroupBuilder {
+func (gb *groupBuilder) Roles(roles ...valueobject.Role) GroupBuilder {
 	gb.roles = roles
 	return gb
 }
@@ -90,7 +89,7 @@ func (g *group) Users() []valueobject.UserID {
 	return g.users
 }
 
-func (g *group) Roles() []entity.Role {
+func (g *group) Roles() []valueobject.Role {
 	return g.roles
 }
 
@@ -98,11 +97,11 @@ func (g *group) AddUsers(users ...valueobject.UserID) {
 	g.users = append(g.users, users...)
 }
 
-func (g *group) AddRoles(roles ...entity.Role) {
+func (g *group) AddRoles(roles ...valueobject.Role) {
 	g.roles = append(g.roles, roles...)
 }
 
-func (g *group) HasRole(role entity.Role) bool {
+func (g *group) HasRole(role valueobject.Role) bool {
 	return slices.Contains(g.roles, role)
 }
 

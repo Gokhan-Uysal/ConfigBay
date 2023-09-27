@@ -46,7 +46,8 @@ func main() {
 		projectRepo    port.ProjectRepo
 		groupRepo      port.GroupRepo
 		userRepo       port.UserRepo
-		authService    port.AuthService
+		userService    port.UserService
+		groupService   port.GroupService
 		projectService port.ProjectService
 		err            error
 	)
@@ -57,7 +58,7 @@ func main() {
 	logger.INFO.Println("Db connected")
 	_ = DB.Ping()
 
-	//Init repos
+	//Initialize repositories
 	projectRepo, err = repo.NewProjectRepo(DB)
 	if err != nil {
 		logger.ERR.Fatalln(err)
@@ -71,16 +72,19 @@ func main() {
 		logger.ERR.Fatalln(err)
 	}
 
-	//Init services
-	authService, err = service.NewAuthService()
+	//Initialize services
+	userService, err = service.NewUserService(userRepo)
+	if err != nil {
+		logger.ERR.Fatalln(err)
+	}
+	groupService, err = service.NewGroupService(groupRepo)
 	if err != nil {
 		logger.ERR.Fatalln(err)
 	}
 	projectService, err = service.NewProjectService(
 		projectRepo,
-		groupRepo,
-		userRepo,
-		authService,
+		groupService,
+		userService,
 	)
 	if err != nil {
 		logger.ERR.Fatalln(err)
@@ -97,10 +101,10 @@ func main() {
 		logger.ERR.Fatalln(err)
 	}
 
-	project, err := projectService.Init(user.Id(), "Campus", "Admins")
+	project, err := projectService.Create(user.Id(), "Campus", "Admins")
 	if err != nil {
 		logger.ERR.Fatalln(err)
 	}
 
-	fmt.Println(project)
+	fmt.Println(project.Groups())
 }

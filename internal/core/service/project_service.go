@@ -3,7 +3,6 @@ package service
 import (
 	"github.com/Gokhan-Uysal/ConfigBay.git/internal/core/domain/aggregate"
 	"github.com/Gokhan-Uysal/ConfigBay.git/internal/core/domain/common/errorx"
-	"github.com/Gokhan-Uysal/ConfigBay.git/internal/core/domain/entity"
 	"github.com/Gokhan-Uysal/ConfigBay.git/internal/core/domain/valueobject"
 	"github.com/Gokhan-Uysal/ConfigBay.git/internal/core/port"
 	"github.com/Gokhan-Uysal/ConfigBay.git/internal/lib/generator"
@@ -13,86 +12,71 @@ import (
 
 type (
 	projectService struct {
-		projectRepo port.ProjectRepo
-		groupRepo   port.GroupRepo
-		userRepo    port.UserRepo
-		authService port.AuthService
+		projectRepo  port.ProjectRepo
+		groupService port.GroupService
+		userService  port.UserService
 	}
 )
 
 func NewProjectService(
 	projectRepo port.ProjectRepo,
-	groupRepo port.GroupRepo,
-	userRepo port.UserRepo,
-	authService port.AuthService,
+	groupService port.GroupService,
+	userService port.UserService,
 ) (port.ProjectService, error) {
 	if projectRepo == nil {
 		return nil, errorx.NilPointerErr{Item: "project repository"}
 	}
-	if groupRepo == nil {
-		return nil, errorx.NilPointerErr{Item: "group repository"}
+	if groupService == nil {
+		return nil, errorx.NilPointerErr{Item: "group service"}
 	}
-	if userRepo == nil {
-		return nil, errorx.NilPointerErr{Item: "user repository"}
-	}
-	if authService == nil {
-		return nil, errorx.NilPointerErr{Item: "authentication service"}
+	if userService == nil {
+		return nil, errorx.NilPointerErr{Item: "user service"}
 	}
 	return &projectService{
-			projectRepo: projectRepo,
-			groupRepo:   groupRepo,
-			userRepo:    userRepo,
-			authService: authService,
+			projectRepo:  projectRepo,
+			groupService: groupService,
+			userService:  userService,
 		},
 		nil
 }
 
-func (ps projectService) Init(
+func (ps projectService) Create(
 	userId valueobject.UserID,
 	projectTitle string,
 	groupTitle string,
 ) (aggregate.Project, error) {
 	var (
-		user       aggregate.User
-		adminGroup aggregate.Group
-		project    aggregate.Project
-		err        error
+		user    aggregate.User
+		project aggregate.Project
+		err     error
 	)
 
-	user, err = ps.userRepo.Find(userId)
+	user, err = ps.userService.Find(userId)
 	if err != nil {
-		logger.ERR.Printf("Failed to get user by ID (%s): %v\n", userId.String(), err)
-		return nil, errorx.UserNotFoundErr{Field: userId.String()}
-	}
-
-	adminGroup = aggregate.NewGroupBuilder(generator.UUID(), groupTitle).
-		Roles(
-			entity.ReadProject,
-			entity.ManageGroups,
-			entity.ManageUsers,
-			entity.ReadSecrets,
-			entity.WriteSecrets,
-			entity.DeleteSecrets,
-		).
-		Users(user.Id()).
-		Build()
-
-	err = ps.groupRepo.Save(adminGroup)
-	if err != nil {
-		logger.ERR.Printf("Failed to save group (%s): %v\n", groupTitle, err)
-		return nil, errorx.GroupCreationErr{Title: projectTitle}
+		return nil, err
 	}
 
 	project = aggregate.NewProjectBuilder(generator.UUID(), projectTitle).
 		CreatedAt(time.Now()).
 		UpdatedAt(time.Now()).
-		Groups(adminGroup.Id()).
 		Build()
 
 	err = ps.projectRepo.Save(project)
 	if err != nil {
 		logger.ERR.Printf("Failed to save project (%s): %v\n", projectTitle, err)
 		return nil, errorx.ProjectCreationErr{Title: projectTitle}
+	}
+
+	_, err = ps.groupService.Create(
+		groupTitle, project.Id(), user.Id(),
+		valueobject.ManageGroups,
+		valueobject.ManageUsers,
+		valueobject.ReadSecrets,
+		valueobject.WriteSecrets,
+		valueobject.DeleteSecrets,
+	)
+	if err != nil {
+		return nil, err
 	}
 
 	return project, nil

@@ -6,16 +6,12 @@ import (
 )
 
 type (
-	ProjectService interface {
+	GroupService interface {
 		Create(
-			valueobject.UserID,
 			string,
-			string,
-		) (aggregate.Project,
-			error)
-		Find(
 			valueobject.ProjectID,
 			valueobject.UserID,
-		) (aggregate.Project, error)
+			...valueobject.Role,
+		) (aggregate.Group, error)
 	}
 )
