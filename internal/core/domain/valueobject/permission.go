@@ -5,19 +5,19 @@ import (
 )
 
 const (
-	ReadProject   Role = "read-project"
-	ManageUsers   Role = "manage-users"
-	ManageGroups  Role = "manage-groups"
-	ReadSecrets   Role = "read-secrets"
-	WriteSecrets  Role = "write-secrets"
-	DeleteSecrets Role = "delete-secrets"
+	ReadProject   Permission = "read-project"
+	ManageUsers   Permission = "manage-users"
+	ManageGroups  Permission = "manage-groups"
+	ReadSecrets   Permission = "read-secrets"
+	WriteSecrets  Permission = "write-secrets"
+	DeleteSecrets Permission = "delete-secrets"
 )
 
 type (
-	Role string
+	Permission string
 )
 
-func ToRoleName(name string) (Role, error) {
+func ToPermission(name string) (Permission, error) {
 	switch name {
 	case string(ReadProject):
 		return ReadProject, nil
@@ -36,6 +36,6 @@ func ToRoleName(name string) (Role, error) {
 	}
 }
 
-func ToString(name Role) string {
+func ToString(name Permission) string {
 	return string(name)
 }
