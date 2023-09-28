@@ -7,7 +7,7 @@ import (
 
 type (
 	GroupRepo interface {
-		Save(group aggregate.Group, projectId valueobject.ProjectID) error
+		Save(group aggregate.Group) error
 		Find(valueobject.GroupID) (aggregate.Group, error)
 	}
 )

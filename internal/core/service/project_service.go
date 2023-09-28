@@ -67,13 +67,10 @@ func (ps projectService) Create(
 		return nil, errorx.ProjectCreationErr{Title: projectTitle}
 	}
 
-	_, err = ps.groupService.Create(
-		groupTitle, project.Id(), user.Id(),
-		valueobject.ManageGroups,
-		valueobject.ManageUsers,
-		valueobject.ReadSecrets,
-		valueobject.WriteSecrets,
-		valueobject.DeleteSecrets,
+	_, err = ps.groupService.CreateGroup(
+		groupTitle, project.Id(),
+		valueobject.Admin,
+		user.Id(),
 	)
 	if err != nil {
 		return nil, err

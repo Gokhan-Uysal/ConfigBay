@@ -25,7 +25,7 @@ func NewGroupRepo(db *sql.DB) (port.GroupRepo, error) {
 	return &groupRepo{baseRepo: base}, nil
 }
 
-func (gr groupRepo) Save(group aggregate.Group, projectId valueobject.ProjectID) error {
+func (gr groupRepo) Save(group aggregate.Group) error {
 	var (
 		tx  *sql.Tx
 		err error
@@ -38,18 +38,10 @@ func (gr groupRepo) Save(group aggregate.Group, projectId valueobject.ProjectID)
 		return gr.baseRepo.CommitOrRollback(tx, err)
 	}
 
-	_, err = gr.SaveGroup(tx, group, projectId)
+	_, err = gr.SaveGroup(tx, group)
 	if err != nil {
 		logger.ERR.Println(err)
 		return gr.baseRepo.CommitOrRollback(tx, err)
-	}
-
-	for _, role := range group.Roles() {
-		_, err = gr.AssignRole(tx, group.Id(), role)
-		if err != nil {
-			logger.ERR.Println(err)
-			return gr.baseRepo.CommitOrRollback(tx, err)
-		}
 	}
 
 	for _, userId := range group.Users() {
@@ -58,7 +50,6 @@ func (gr groupRepo) Save(group aggregate.Group, projectId valueobject.ProjectID)
 			logger.ERR.Println(err)
 			return gr.baseRepo.CommitOrRollback(tx, err)
 		}
-
 	}
 
 	logger.DEBUG.Println("Group saved.")
@@ -68,7 +59,7 @@ func (gr groupRepo) Save(group aggregate.Group, projectId valueobject.ProjectID)
 func (gr groupRepo) Find(groupId valueobject.GroupID) (aggregate.Group, error) {
 	var (
 		group   aggregate.Group
-		roles   []valueobject.Role
+		role    valueobject.Role
 		userIds []valueobject.UserID
 		err     error
 	)
@@ -79,7 +70,7 @@ func (gr groupRepo) Find(groupId valueobject.GroupID) (aggregate.Group, error) {
 		return nil, err
 	}
 
-	roles, err = gr.FindRolesByGroup(groupId)
+	role, err = gr.FindRole(groupId)
 	if err != nil {
 		logger.ERR.Println(err)
 		return nil, err
@@ -91,7 +82,7 @@ func (gr groupRepo) Find(groupId valueobject.GroupID) (aggregate.Group, error) {
 		return nil, err
 	}
 
-	group.AddRoles(roles...)
+	group.SetRole(role)
 	group.AddUsers(userIds...)
 
 	return group, nil
@@ -100,7 +91,6 @@ func (gr groupRepo) Find(groupId valueobject.GroupID) (aggregate.Group, error) {
 func (gr groupRepo) SaveGroup(
 	tx *sql.Tx,
 	group aggregate.Group,
-	projectId valueobject.ProjectID,
 ) (sql.Result, error) {
 	var (
 		result sql.Result
@@ -109,8 +99,8 @@ func (gr groupRepo) SaveGroup(
 
 	result, err = gr.baseRepo.Exec(
 		tx,
-		"INSERT INTO groups (id, title, project_id) VALUES ($1, $2, $3)",
-		group.Id(), group.Title(), projectId,
+		"INSERT INTO groups (id, title, project_id, role) VALUES ($1, $2, $3, $4)",
+		group.Id(), group.Title(), group.ProjectId(), group.RoleName(),
 	)
 	if err != nil {
 		logger.ERR.Println(err)
@@ -129,7 +119,7 @@ func (gr groupRepo) FindGroup(groupId valueobject.GroupID) (aggregate.Group, err
 
 	row = gr.baseRepo.QueryRow(
 		nil,
-		"SELECT id, title, created_at, updated_at FROM groups WHERE id=$1",
+		"SELECT id, title, project_id ,created_at, updated_at FROM groups WHERE id=$1",
 		groupId,
 	)
 
@@ -214,8 +204,100 @@ func (gr groupRepo) DropUser(tx *sql.Tx, groupId, userId valueobject.UserID) (sq
 	return result, nil
 }
 
-func (gr groupRepo) AssignRole(
-	tx *sql.Tx, groupId valueobject.GroupID, role valueobject.Role,
+func (gr groupRepo) FindRole(groupId valueobject.GroupID) (valueobject.Role, error) {
+	var (
+		role        valueobject.Role
+		permissions []valueobject.Permission
+		rows        *sql.Rows
+		row         *sql.Row
+		err         error
+	)
+
+	row = gr.baseRepo.QueryRow(
+		nil,
+		"SELECT r.name FROM roles r INNER JOIN groups g ON g.role=r.name WHERE g.id=$1",
+		groupId,
+	)
+	if err != nil {
+		logger.ERR.Println(err)
+		return nil, err
+	}
+
+	role, err = gr.MapRole(row)
+	if err != nil {
+		logger.ERR.Println(err)
+		return nil, err
+	}
+
+	rows, err = gr.baseRepo.Query(
+		nil,
+		"SELECT p.name FROM role_permissions rp INNER JOIN roles r ON r.name=rp.name INNER JOIN permissions p ON p.name=rp.name WHERE r.name=$1",
+		role.Name(),
+	)
+
+	for rows.Next() {
+		var (
+			permission valueobject.Permission
+		)
+
+		permission, err = gr.MapPermission(rows)
+		if err != nil {
+			logger.ERR.Println(err)
+			return nil, err
+		}
+
+		permissions = append(permissions, permission)
+	}
+
+	role.AddPermissions(permissions...)
+
+	defer gr.baseRepo.CloseRows(rows)
+	return role, nil
+}
+
+func (gr groupRepo) SaveRole(role valueobject.Role) error {
+	var (
+		tx  *sql.Tx
+		err error
+	)
+
+	tx, err = gr.baseRepo.Begin()
+	if err != nil {
+		logger.ERR.Println(err)
+		return err
+	}
+
+	_, err = gr.baseRepo.Exec(
+		tx,
+		"INSERT INTO roles (name) VALUES ($1)",
+		role.Name(),
+	)
+	if err != nil {
+		logger.ERR.Println(err)
+		return gr.baseRepo.CommitOrRollback(tx, err)
+	}
+
+	for _, permission := range role.Permissions() {
+		_, err = gr.SavePermission(tx, permission)
+		if err != nil {
+			logger.ERR.Println(err)
+			return gr.baseRepo.CommitOrRollback(tx, err)
+		}
+
+		_, err := gr.AssignPermission(tx, role, permission)
+		if err != nil {
+			logger.ERR.Println(err)
+			return gr.baseRepo.CommitOrRollback(tx, err)
+		}
+	}
+
+	return nil
+}
+
+func (gr groupRepo) AssignPermission(
+	tx *sql.Tx,
+	role valueobject.Role,
+	permission valueobject.Permission,
 ) (sql.Result, error) {
 	var (
 		result sql.Result
@@ -224,8 +306,8 @@ func (gr groupRepo) AssignRole(
 
 	result, err = gr.baseRepo.Exec(
 		tx,
-		"INSERT INTO group_roles (group_id, role) VALUES ($1, $2)",
-		groupId, role,
+		"INSERT INTO role_permissions (role, permission) VALUES ($1, $2)",
+		role.Name(), valueobject.ToString(permission),
 	)
 	if err != nil {
 		logger.ERR.Println(err)
@@ -235,62 +317,9 @@ func (gr groupRepo) AssignRole(
 	return result, nil
 }
 
-func (gr groupRepo) FinRoleByName(name valueobject.Role) (valueobject.Role, error) {
-	var (
-		row  *sql.Row
-		role valueobject.Role
-		err  error
-	)
-
-	row = gr.baseRepo.QueryRow(nil, "SELECT name FROM roles WHERE name=$1", name)
-	role, err = gr.MapRole(row)
-	if err != nil {
-		logger.ERR.Println(err)
-		return "", err
-	}
-
-	return role, nil
-}
-
-func (gr groupRepo) FindRolesByGroup(groupId valueobject.GroupID) ([]valueobject.Role, error) {
-	var (
-		roles []valueobject.Role
-		rows  *sql.Rows
-		err   error
-	)
-
-	rows, err = gr.baseRepo.Query(
-		nil,
-		"SELECT r.name FROM group_roles gr INNER JOIN roles r ON r.name=gr.role WHERE gr.group_id=$1",
-		groupId,
-	)
-	if err != nil {
-		logger.ERR.Println(err)
-		return nil, err
-	}
-
-	for rows.Next() {
-		var (
-			role valueobject.Role
-		)
-
-		role, err = gr.MapRole(rows)
-		if err != nil {
-			logger.ERR.Println(err)
-			return nil, err
-		}
-
-		roles = append(roles, role)
-	}
-
-	defer gr.baseRepo.CloseRows(rows)
-	return roles, nil
-}
-
-func (gr groupRepo) DropRole(
+func (gr groupRepo) SavePermission(
 	tx *sql.Tx,
-	groupId valueobject.GroupID,
-	role valueobject.Role,
+	permission valueobject.Permission,
 ) (sql.Result, error) {
 	var (
 		result sql.Result
@@ -299,8 +328,31 @@ func (gr groupRepo) DropRole(
 
 	result, err = gr.baseRepo.Exec(
 		tx,
-		"DELETE FROM group_roles WHERE group_id=$1 AND role=$2",
-		groupId, role,
+		"INSERT INTO permissions (name) VALUES ($1)",
+		valueobject.ToString(permission),
+	)
+	if err != nil {
+		logger.ERR.Println(err)
+		return nil, err
+	}
+
+	return result, nil
+}
+
+func (gr groupRepo) DropPermission(
+	tx *sql.Tx,
+	role valueobject.Role,
+	permission valueobject.Permission,
+) (sql.Result, error) {
+	var (
+		result sql.Result
+		err    error
+	)
+
+	result, err = gr.baseRepo.Exec(
+		tx,
+		"DELETE FROM role_permissions WHERE role=$1 AND permission=$2",
+		role.Name(), valueobject.ToString(permission),
 	)
 	if err != nil {
 		logger.ERR.Println(err)
@@ -314,18 +366,19 @@ func (gr groupRepo) MapGroup(s Scanner) (aggregate.Group, error) {
 	var (
 		id        uuid.UUID
 		title     string
+		projectId uuid.UUID
 		createdAt time.Time
 		updatedAt time.Time
 		group     aggregate.Group
 		err       error
 	)
 
-	err = s.Scan(&id, &title, &createdAt, &updatedAt)
+	err = s.Scan(&id, &title, &projectId, &createdAt, &updatedAt)
 	if err != nil {
 		return nil, err
 	}
 
-	group = aggregate.NewGroupBuilder(id, title).
+	group = aggregate.NewGroupBuilder(id, title, projectId).
 		CreatedAt(createdAt).
 		UpdatedAt(updatedAt).
 		Build()
@@ -336,8 +389,22 @@ func (gr groupRepo) MapGroup(s Scanner) (aggregate.Group, error) {
 func (gr groupRepo) MapRole(s Scanner) (valueobject.Role, error) {
 	var (
 		name string
-		role valueobject.Role
 		err  error
+	)
+
+	err = s.Scan(&err, &name)
+	if err != nil {
+		return nil, err
+	}
+
+	return valueobject.NewRole(name), nil
+}
+
+func (gr groupRepo) MapPermission(s Scanner) (valueobject.Permission, error) {
+	var (
+		name       string
+		permission valueobject.Permission
+		err        error
 	)
 
 	err = s.Scan(&name)
@@ -345,10 +412,10 @@ func (gr groupRepo) MapRole(s Scanner) (valueobject.Role, error) {
 		return "", err
 	}
 
-	role, err = valueobject.ToRoleName(name)
+	permission, err = valueobject.ToPermission(name)
 	if err != nil {
 		return "", err
 	}
 
-	return role, nil
+	return permission, nil
 }

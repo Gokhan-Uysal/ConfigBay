@@ -9,8 +9,8 @@ import (
 
 type (
 	GroupBuilder interface {
+		Role(role valueobject.Role) GroupBuilder
 		Users(...valueobject.UserID) GroupBuilder
-		Roles(...valueobject.Role) GroupBuilder
 		CreatedAt(time.Time) GroupBuilder
 		UpdatedAt(time.Time) GroupBuilder
 		model.Builder[Group]
@@ -19,13 +19,15 @@ type (
 	Group interface {
 		Id() valueobject.GroupID
 		Title() string
+		RolePermissions() []valueobject.Permission
+		RoleName() string
 		Users() []valueobject.UserID
-		Roles() []valueobject.Role
+		ProjectId() valueobject.ProjectID
 		CreatedAt() time.Time
 		UpdatedAt() time.Time
-		AddRoles(...valueobject.Role)
+		SetRole(role valueobject.Role)
 		AddUsers(...valueobject.UserID)
-		HasRole(valueobject.Role) bool
+		HasPermission(valueobject.Permission) bool
 	}
 
 	groupBuilder struct {
@@ -35,15 +37,20 @@ type (
 	group struct {
 		id        valueobject.GroupID
 		title     string
+		role      valueobject.Role
 		users     []valueobject.UserID
-		roles     []valueobject.Role
+		projectId valueobject.ProjectID
 		createdAt time.Time
 		updatedAt time.Time
 	}
 )
 
-func NewGroupBuilder(id valueobject.GroupID, title string) GroupBuilder {
-	return &groupBuilder{group{id: id, title: title}}
+func NewGroupBuilder(
+	id valueobject.GroupID,
+	title string,
+	projectId valueobject.ProjectID,
+) GroupBuilder {
+	return &groupBuilder{group{id: id, title: title, projectId: projectId}}
 }
 
 func (gb *groupBuilder) Users(users ...valueobject.UserID) GroupBuilder {
@@ -51,8 +58,8 @@ func (gb *groupBuilder) Users(users ...valueobject.UserID) GroupBuilder {
 	return gb
 }
 
-func (gb *groupBuilder) Roles(roles ...valueobject.Role) GroupBuilder {
-	gb.roles = roles
+func (gb *groupBuilder) Role(role valueobject.Role) GroupBuilder {
+	gb.role = role
 	return gb
 }
 
@@ -70,8 +77,9 @@ func (gb *groupBuilder) Build() Group {
 	return &group{
 		id:        gb.id,
 		title:     gb.title,
+		role:      gb.role,
 		users:     gb.users,
-		roles:     gb.roles,
+		projectId: gb.projectId,
 		createdAt: gb.createdAt,
 		updatedAt: gb.updatedAt,
 	}
@@ -89,20 +97,28 @@ func (g *group) Users() []valueobject.UserID {
 	return g.users
 }
 
-func (g *group) Roles() []valueobject.Role {
-	return g.roles
+func (g *group) RoleName() string {
+	return g.role.Name()
+}
+
+func (g *group) RolePermissions() []valueobject.Permission {
+	return g.role.Permissions()
+}
+
+func (g *group) ProjectId() valueobject.ProjectID {
+	return g.projectId
+}
+
+func (g *group) SetRole(role valueobject.Role) {
+	g.role = role
 }
 
 func (g *group) AddUsers(users ...valueobject.UserID) {
 	g.users = append(g.users, users...)
 }
 
-func (g *group) AddRoles(roles ...valueobject.Role) {
-	g.roles = append(g.roles, roles...)
-}
-
-func (g *group) HasRole(role valueobject.Role) bool {
-	return slices.Contains(g.roles, role)
+func (g *group) HasPermission(p valueobject.Permission) bool {
+	return slices.Contains(g.role.Permissions(), p)
 }
 
 func (g *group) CreatedAt() time.Time {

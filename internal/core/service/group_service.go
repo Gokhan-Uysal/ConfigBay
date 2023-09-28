@@ -27,22 +27,22 @@ func NewGroupService(
 		nil
 }
 
-func (gs groupService) Create(
+func (gs groupService) CreateGroup(
 	groupTitle string,
 	projectId valueobject.ProjectID,
-	userId valueobject.UserID,
-	roles ...valueobject.Role,
+	role valueobject.Role,
+	userIds ...valueobject.UserID,
 ) (aggregate.Group, error) {
 	var (
 		adminGroup aggregate.Group
 		err        error
 	)
-	adminGroup = aggregate.NewGroupBuilder(generator.UUID(), groupTitle).
-		Roles(roles...).
-		Users(userId).
+	adminGroup = aggregate.NewGroupBuilder(generator.UUID(), groupTitle, projectId).
+		Role(role).
+		Users(userIds...).
 		Build()
 
-	err = gs.groupRepo.Save(adminGroup, projectId)
+	err = gs.groupRepo.Save(adminGroup)
 	if err != nil {
 		logger.ERR.Printf("Failed to save group (%s): %v\n", groupTitle, err)
 		return nil, errorx.GroupCreationErr{Title: groupTitle}

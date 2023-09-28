@@ -7,11 +7,11 @@ import (
 
 type (
 	GroupService interface {
-		Create(
-			string,
-			valueobject.ProjectID,
-			valueobject.UserID,
-			...valueobject.Role,
+		CreateGroup(
+			groupTitle string,
+			projectId valueobject.ProjectID,
+			role valueobject.Role,
+			userIds ...valueobject.UserID,
 		) (aggregate.Group, error)
 	}
 )
