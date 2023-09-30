@@ -106,7 +106,10 @@ func main() {
 	}
 	fmt.Println(projectService)
 
-	pageController = controller.NewPageController(render)
+	pageController, err = controller.NewPageController(render)
+	if err != nil {
+		logger.ERR.Fatalln(err)
+	}
 
 	handler := http.NewServeMux()
 	handler.HandleFunc("/", pageController.Home)

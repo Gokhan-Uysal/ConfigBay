@@ -1,6 +1,7 @@
 package controller
 
 import (
+	"github.com/Gokhan-Uysal/ConfigBay.git/internal/core/domain/common/errorx"
 	"github.com/Gokhan-Uysal/ConfigBay.git/internal/core/port"
 	"net/http"
 )
@@ -10,8 +11,11 @@ type pageController struct {
 	renderer port.Renderer
 }
 
-func NewPageController(renderer port.Renderer) port.PageController {
-	return pageController{baseController: &baseController{}}
+func NewPageController(renderer port.Renderer) (port.PageController, error) {
+	if renderer == nil {
+		return nil, errorx.NilPointerErr{Item: "renderer"}
+	}
+	return pageController{baseController: &baseController{}, renderer: renderer}, nil
 }
 
 func (pc pageController) Home(w http.ResponseWriter, r *http.Request) {

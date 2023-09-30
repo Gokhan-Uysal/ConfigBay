@@ -18,11 +18,12 @@ func New() port.Renderer {
 	return &renderer{templates: make(map[string]*template.Template)}
 }
 
-func (r renderer) Load(path string) error {
+func (r *renderer) Load(path string) error {
 	var (
-		pages   []string
-		layouts []string
-		err     error
+		pages       []string
+		componentns []string
+		layouts     []string
+		err         error
 	)
 
 	pages, err = r.LoadPageFiles(path)
@@ -31,6 +32,11 @@ func (r renderer) Load(path string) error {
 	}
 
 	layouts, err = r.LoadLayoutFiles(path)
+	if err != nil {
+		return err
+	}
+
+	componentns, err = r.LoadComponentFiles(path)
 	if err != nil {
 		return err
 	}
@@ -44,6 +50,10 @@ func (r renderer) Load(path string) error {
 		pageName = filepath.Base(page)
 
 		tmpl = template.New(pageName)
+		tmpl, err = tmpl.ParseFiles(componentns...)
+		if err != nil {
+			return err
+		}
 		tmpl, err = tmpl.ParseFiles(layouts...)
 		if err != nil {
 			return err
@@ -59,7 +69,7 @@ func (r renderer) Load(path string) error {
 	return nil
 }
 
-func (r renderer) Render(page string, wr io.Writer, data ...interface{}) error {
+func (r *renderer) Render(page string, wr io.Writer, data ...interface{}) error {
 	var (
 		tmpl *template.Template
 		err  error
@@ -78,7 +88,7 @@ func (r renderer) Render(page string, wr io.Writer, data ...interface{}) error {
 	return nil
 }
 
-func (r renderer) LoadPageFiles(path string) ([]string, error) {
+func (r *renderer) LoadPageFiles(path string) ([]string, error) {
 	var (
 		paths []string
 		err   error
@@ -92,7 +102,7 @@ func (r renderer) LoadPageFiles(path string) ([]string, error) {
 	return paths, nil
 }
 
-func (r renderer) LoadLayoutFiles(path string) ([]string, error) {
+func (r *renderer) LoadLayoutFiles(path string) ([]string, error) {
 	var (
 		paths []string
 		err   error
@@ -106,7 +116,21 @@ func (r renderer) LoadLayoutFiles(path string) ([]string, error) {
 	return paths, nil
 }
 
-func (r renderer) LoadFilesContaining(path string, contains string) ([]string, error) {
+func (r *renderer) LoadComponentFiles(path string) ([]string, error) {
+	var (
+		paths []string
+		err   error
+	)
+
+	paths, err = r.LoadFilesContaining(path, "component")
+	if err != nil {
+		return nil, err
+	}
+
+	return paths, nil
+}
+
+func (r *renderer) LoadFilesContaining(path string, contains string) ([]string, error) {
 	var (
 		filePaths map[string]string
 		paths     = make([]string, 0)

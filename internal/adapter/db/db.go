@@ -3,7 +3,7 @@ package db
 import (
 	"database/sql"
 	"fmt"
-	"log"
+	"github.com/Gokhan-Uysal/ConfigBay.git/internal/lib/logger"
 	"time"
 
 	"github.com/Gokhan-Uysal/ConfigBay.git/internal/config"
@@ -19,7 +19,7 @@ const (
 func Init(driverName string, dsn string) *sql.DB {
 	conn := connect(driverName, dsn)
 	if conn == nil {
-		log.Panicln("unable to connect to db")
+		logger.ERR.Panicln("unable to connect to db")
 	}
 	return conn
 }
@@ -44,13 +44,11 @@ func connect(driverName string, dsn string) *sql.DB {
 
 	for i := 0; i < retry; i++ {
 		db, err = open(driverName, dsn)
-
 		if err == nil {
 			return db
 		}
 
-		log.Printf("db is not ready trying again in %d seconds...\n", sleep/time.Second)
-
+		logger.WARN.Printf("db is not ready trying again in %d seconds...\n", sleep/time.Second)
 		time.Sleep(sleep)
 	}
 
@@ -59,13 +57,11 @@ func connect(driverName string, dsn string) *sql.DB {
 
 func open(driverName string, dsn string) (*sql.DB, error) {
 	db, err := sql.Open(driverName, dsn)
-
 	if err != nil {
 		return nil, err
 	}
 
 	err = db.Ping()
-
 	if err != nil {
 		return nil, err
 	}
