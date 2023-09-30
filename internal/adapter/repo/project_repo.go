@@ -13,7 +13,7 @@ import (
 
 type (
 	projectRepo struct {
-		baseRepo port.BaseRepo
+		*baseRepo
 	}
 )
 
@@ -32,28 +32,28 @@ func (pr projectRepo) Save(project aggregate.Project) error {
 	)
 	logger.DEBUG.Println("Starting to save project.")
 
-	tx, err = pr.baseRepo.Begin()
+	tx, err = pr.Begin()
 	if err != nil {
 		logger.ERR.Println(err)
-		return pr.baseRepo.CommitOrRollback(tx, err)
+		return pr.CommitOrRollback(tx, err)
 	}
 
 	_, err = pr.SaveProject(tx, project)
 	if err != nil {
 		logger.ERR.Println(err)
-		return pr.baseRepo.CommitOrRollback(tx, err)
+		return pr.CommitOrRollback(tx, err)
 	}
 
 	for _, secret := range project.Secrets() {
 		_, err = pr.AddSecret(tx, project.Id(), secret)
 		if err != nil {
 			logger.ERR.Println(err)
-			return pr.baseRepo.CommitOrRollback(tx, err)
+			return pr.CommitOrRollback(tx, err)
 		}
 	}
 
 	logger.DEBUG.Println("Project saved.")
-	return pr.baseRepo.CommitOrRollback(tx, err)
+	return pr.CommitOrRollback(tx, err)
 }
 
 func (pr projectRepo) Find(projectId valueobject.ProjectID) (aggregate.Project, error) {
@@ -94,7 +94,7 @@ func (pr projectRepo) Update(project aggregate.Project) error {
 		_  error
 	)
 
-	return pr.baseRepo.CommitOrRollback(tx, nil)
+	return pr.CommitOrRollback(tx, nil)
 }
 
 func (pr projectRepo) SaveProject(tx *sql.Tx, project aggregate.Project) (sql.Result, error) {
@@ -103,7 +103,7 @@ func (pr projectRepo) SaveProject(tx *sql.Tx, project aggregate.Project) (sql.Re
 		err    error
 	)
 
-	result, err = pr.baseRepo.Exec(
+	result, err = pr.Exec(
 		tx,
 		"INSERT INTO projects (id, title) VALUES ($1, $2)",
 		project.Id(), project.Title(),
@@ -122,7 +122,7 @@ func (pr projectRepo) FindProject(projectId valueobject.ProjectID) (aggregate.Pr
 		err     error
 	)
 
-	row = pr.baseRepo.QueryRow(nil, "SELECT * FROM projects WHERE id=$1", projectId)
+	row = pr.QueryRow(nil, "SELECT * FROM projects WHERE id=$1", projectId)
 
 	project, err = pr.MapProject(row)
 	if err != nil {
@@ -139,7 +139,7 @@ func (pr projectRepo) FindGroups(projectId valueobject.ProjectID) ([]valueobject
 		err      error
 	)
 
-	rows, err = pr.baseRepo.Query(
+	rows, err = pr.Query(
 		nil, "SELECT id FROM groups WHERE project_id=$1",
 		projectId,
 	)
@@ -160,7 +160,7 @@ func (pr projectRepo) FindGroups(projectId valueobject.ProjectID) ([]valueobject
 		groupIds = append(groupIds, id)
 	}
 
-	defer pr.baseRepo.CloseRows(rows)
+	defer pr.CloseRows(rows)
 	return groupIds, nil
 }
 
@@ -174,7 +174,7 @@ func (pr projectRepo) AddSecret(
 		err    error
 	)
 
-	result, err = pr.baseRepo.Exec(
+	result, err = pr.Exec(
 		tx,
 		"INSERT INTO secrets (project_id, key, value) VALUES ($1, $2, $3)",
 		projectId, secret.Key(), secret.Value(),
@@ -193,7 +193,7 @@ func (pr projectRepo) FindSecrets(projectId valueobject.ProjectID) ([]entity.Sec
 		err     error
 	)
 
-	rows, err = pr.baseRepo.Query(
+	rows, err = pr.Query(
 		nil,
 		"SELECT key, value, version, created_at, updated_at FROM secrets WHERE project_id=$1",
 		projectId,
@@ -212,7 +212,7 @@ func (pr projectRepo) FindSecrets(projectId valueobject.ProjectID) ([]entity.Sec
 		secrets = append(secrets, secret)
 	}
 
-	defer pr.baseRepo.CloseRows(rows)
+	defer pr.CloseRows(rows)
 	return secrets, nil
 }
 
@@ -226,7 +226,7 @@ func (pr projectRepo) UpdateSecretValue(
 		err    error
 	)
 
-	result, err = pr.baseRepo.Exec(
+	result, err = pr.Exec(
 		tx,
 		"UPDATE secrets SET value=$1 WHERE project_id=$2 AND key=$3",
 		secret.Value(), projectId, secret.Key(),
@@ -248,7 +248,7 @@ func (pr projectRepo) DeleteSecret(
 		err    error
 	)
 
-	result, err = pr.baseRepo.Exec(
+	result, err = pr.Exec(
 		tx,
 		"DELETE FROM secrets WHERE project_id=$1 AND key=$2",
 		projectId, key,

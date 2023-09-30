@@ -14,7 +14,7 @@ import (
 
 type (
 	userRepo struct {
-		baseRepo port.BaseRepo
+		*baseRepo
 	}
 )
 
@@ -33,7 +33,7 @@ func (ur *userRepo) Save(user aggregate.User) (sql.Result, error) {
 		err    error
 	)
 
-	result, err = ur.baseRepo.Exec(
+	result, err = ur.Exec(
 		nil,
 		"INSERT INTO users (id, username, email) VALUES ($1, $2, $3)", user.Id(),
 		user.Username(), user.Email().String(),
@@ -52,7 +52,7 @@ func (ur *userRepo) Find(userId valueobject.UserID) (aggregate.User, error) {
 		err  error
 	)
 
-	row = ur.baseRepo.QueryRow(
+	row = ur.QueryRow(
 		nil,
 		"SELECT id, username, email, active, created_at, updated_at FROM users WHERE id=$1",
 		userId.String(),

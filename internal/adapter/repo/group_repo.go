@@ -12,7 +12,7 @@ import (
 
 type (
 	groupRepo struct {
-		baseRepo port.BaseRepo
+		*baseRepo
 	}
 )
 
@@ -32,28 +32,28 @@ func (gr groupRepo) Save(group aggregate.Group) error {
 	)
 	logger.DEBUG.Println("Starting to save group.")
 
-	tx, err = gr.baseRepo.Begin()
+	tx, err = gr.Begin()
 	if err != nil {
 		logger.ERR.Println(err)
-		return gr.baseRepo.CommitOrRollback(tx, err)
+		return gr.CommitOrRollback(tx, err)
 	}
 
 	_, err = gr.SaveGroup(tx, group)
 	if err != nil {
 		logger.ERR.Println(err)
-		return gr.baseRepo.CommitOrRollback(tx, err)
+		return gr.CommitOrRollback(tx, err)
 	}
 
 	for _, userId := range group.Users() {
 		_, err = gr.AssignUser(tx, group.Id(), userId)
 		if err != nil {
 			logger.ERR.Println(err)
-			return gr.baseRepo.CommitOrRollback(tx, err)
+			return gr.CommitOrRollback(tx, err)
 		}
 	}
 
 	logger.DEBUG.Println("Group saved.")
-	return gr.baseRepo.CommitOrRollback(tx, err)
+	return gr.CommitOrRollback(tx, err)
 }
 
 func (gr groupRepo) Find(groupId valueobject.GroupID) (aggregate.Group, error) {
@@ -97,7 +97,7 @@ func (gr groupRepo) SaveGroup(
 		err    error
 	)
 
-	result, err = gr.baseRepo.Exec(
+	result, err = gr.Exec(
 		tx,
 		"INSERT INTO groups (id, title, project_id, role) VALUES ($1, $2, $3, $4)",
 		group.Id(), group.Title(), group.ProjectId(), group.RoleName(),
@@ -117,7 +117,7 @@ func (gr groupRepo) FindGroup(groupId valueobject.GroupID) (aggregate.Group, err
 		err   error
 	)
 
-	row = gr.baseRepo.QueryRow(
+	row = gr.QueryRow(
 		nil,
 		"SELECT id, title, project_id ,created_at, updated_at FROM groups WHERE id=$1",
 		groupId,
@@ -138,7 +138,7 @@ func (gr groupRepo) AssignUser(tx *sql.Tx, groupId, userId valueobject.UserID) (
 		err    error
 	)
 
-	result, err = gr.baseRepo.Exec(
+	result, err = gr.Exec(
 		tx,
 		"INSERT INTO group_users (group_id, user_id) VALUES ($1, $2)",
 		groupId, userId,
@@ -158,7 +158,7 @@ func (gr groupRepo) FindUsers(groupId valueobject.GroupID) ([]valueobject.UserID
 		err     error
 	)
 
-	rows, err = gr.baseRepo.Query(
+	rows, err = gr.Query(
 		nil,
 		"SELECT user_id FROM group_users WHERE group_id=$1",
 		groupId,
@@ -191,7 +191,7 @@ func (gr groupRepo) DropUser(tx *sql.Tx, groupId, userId valueobject.UserID) (sq
 		err    error
 	)
 
-	result, err = gr.baseRepo.Exec(
+	result, err = gr.Exec(
 		tx,
 		"DELETE FROM group_users WHERE group_id=$1 AND user_id=$2",
 		groupId, userId,
@@ -213,7 +213,7 @@ func (gr groupRepo) FindRole(groupId valueobject.GroupID) (valueobject.Role, err
 		err         error
 	)
 
-	row = gr.baseRepo.QueryRow(
+	row = gr.QueryRow(
 		nil,
 		"SELECT r.name FROM roles r INNER JOIN groups g ON g.role=r.name WHERE g.id=$1",
 		groupId,
@@ -229,7 +229,7 @@ func (gr groupRepo) FindRole(groupId valueobject.GroupID) (valueobject.Role, err
 		return nil, err
 	}
 
-	rows, err = gr.baseRepo.Query(
+	rows, err = gr.Query(
 		nil,
 		"SELECT p.name FROM role_permissions rp INNER JOIN roles r ON r.name=rp.name INNER JOIN permissions p ON p.name=rp.name WHERE r.name=$1",
 		role.Name(),
@@ -251,7 +251,7 @@ func (gr groupRepo) FindRole(groupId valueobject.GroupID) (valueobject.Role, err
 
 	role.AddPermissions(permissions...)
 
-	defer gr.baseRepo.CloseRows(rows)
+	defer gr.CloseRows(rows)
 	return role, nil
 }
 
@@ -261,33 +261,33 @@ func (gr groupRepo) SaveRole(role valueobject.Role) error {
 		err error
 	)
 
-	tx, err = gr.baseRepo.Begin()
+	tx, err = gr.Begin()
 	if err != nil {
 		logger.ERR.Println(err)
 		return err
 	}
 
-	_, err = gr.baseRepo.Exec(
+	_, err = gr.Exec(
 		tx,
 		"INSERT INTO roles (name) VALUES ($1)",
 		role.Name(),
 	)
 	if err != nil {
 		logger.ERR.Println(err)
-		return gr.baseRepo.CommitOrRollback(tx, err)
+		return gr.CommitOrRollback(tx, err)
 	}
 
 	for _, permission := range role.Permissions() {
 		_, err = gr.SavePermission(tx, permission)
 		if err != nil {
 			logger.ERR.Println(err)
-			return gr.baseRepo.CommitOrRollback(tx, err)
+			return gr.CommitOrRollback(tx, err)
 		}
 
 		_, err := gr.AssignPermission(tx, role, permission)
 		if err != nil {
 			logger.ERR.Println(err)
-			return gr.baseRepo.CommitOrRollback(tx, err)
+			return gr.CommitOrRollback(tx, err)
 		}
 	}
 
@@ -304,7 +304,7 @@ func (gr groupRepo) AssignPermission(
 		err    error
 	)
 
-	result, err = gr.baseRepo.Exec(
+	result, err = gr.Exec(
 		tx,
 		"INSERT INTO role_permissions (role, permission) VALUES ($1, $2)",
 		role.Name(), valueobject.ToString(permission),
@@ -326,7 +326,7 @@ func (gr groupRepo) SavePermission(
 		err    error
 	)
 
-	result, err = gr.baseRepo.Exec(
+	result, err = gr.Exec(
 		tx,
 		"INSERT INTO permissions (name) VALUES ($1)",
 		valueobject.ToString(permission),
@@ -349,7 +349,7 @@ func (gr groupRepo) DropPermission(
 		err    error
 	)
 
-	result, err = gr.baseRepo.Exec(
+	result, err = gr.Exec(
 		tx,
 		"DELETE FROM role_permissions WHERE role=$1 AND permission=$2",
 		role.Name(), valueobject.ToString(permission),
