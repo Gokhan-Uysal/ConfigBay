@@ -1,8 +1,10 @@
 package controller
 
 import (
+	"github.com/Gokhan-Uysal/ConfigBay.git/internal/adapter/web/model"
 	"github.com/Gokhan-Uysal/ConfigBay.git/internal/core/domain/common/errorx"
 	"github.com/Gokhan-Uysal/ConfigBay.git/internal/core/port"
+	"github.com/Gokhan-Uysal/ConfigBay.git/internal/lib/logger"
 	"net/http"
 )
 
@@ -22,12 +24,32 @@ func (pc pageController) Favicon(w http.ResponseWriter, r *http.Request) {
 
 }
 
-func (pc pageController) Home(w http.ResponseWriter, r *http.Request) {
-	if err := pc.renderer.Render("home.page.gohtml", w); err == nil {
+func (pc pageController) Home(rw http.ResponseWriter, r *http.Request) {
+	var (
+		httpErr *model.HTTPError
+	)
+
+	if r.Method != http.MethodGet {
+		httpErr = &model.HTTPError{
+			StatusCode:    http.StatusNotFound,
+			StatusMessage: "Page Not Found!",
+		}
+		rw.WriteHeader(http.StatusNotFound)
+
+		if err := pc.renderer.Render("error.page.gohtml", rw, httpErr); err != nil {
+			logger.ERR.Println(err)
+		}
 		return
 	}
 
-	if err := pc.renderer.Render("404.page.gohtml", w); err != nil {
-		w.WriteHeader(http.StatusNotFound)
+	if err := pc.renderer.Render("home.page.gohtml", rw, nil); err == nil {
+		return
+	}
+
+	httpErr = &model.HTTPError{
+		StatusCode: http.StatusInternalServerError, StatusMessage: "Boom!",
+	}
+	if err := pc.renderer.Render("error.page.gohtml", rw, httpErr); err != nil {
+		rw.WriteHeader(http.StatusInternalServerError)
 	}
 }

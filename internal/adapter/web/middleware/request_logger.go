@@ -6,8 +6,8 @@ import (
 )
 
 func RequestLogger(handler http.HandlerFunc) http.HandlerFunc {
-	return func(w http.ResponseWriter, r *http.Request) {
+	return func(rw http.ResponseWriter, r *http.Request) {
 		logger.INFO.Printf("[%s] [%s] %s\n", r.Method, r.RequestURI, r.RemoteAddr)
-		handler(w, r)
+		handler(rw, r)
 	}
 }

@@ -113,7 +113,7 @@ func main() {
 	}
 
 	handler := http.NewServeMux()
-	handler.HandleFunc("/", middleware.RequestLogger(pageController.Home))
+	handler.HandleFunc("/home", middleware.RequestLogger(pageController.Home))
 
 	logger.ERR.Fatalln(http.ListenAndServe(":8000", handler))
 }

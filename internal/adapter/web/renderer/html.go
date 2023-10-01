@@ -69,7 +69,7 @@ func (r *renderer) Load(path string) error {
 	return nil
 }
 
-func (r *renderer) Render(page string, wr io.Writer, data ...interface{}) error {
+func (r *renderer) Render(page string, wr io.Writer, data interface{}) error {
 	var (
 		tmpl *template.Template
 		err  error
