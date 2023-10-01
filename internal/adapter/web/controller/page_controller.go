@@ -18,6 +18,10 @@ func NewPageController(renderer port.Renderer) (port.PageController, error) {
 	return pageController{baseController: &baseController{}, renderer: renderer}, nil
 }
 
+func (pc pageController) Favicon(w http.ResponseWriter, r *http.Request) {
+
+}
+
 func (pc pageController) Home(w http.ResponseWriter, r *http.Request) {
 	if err := pc.renderer.Render("home.page.gohtml", w); err == nil {
 		return

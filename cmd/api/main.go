@@ -5,6 +5,7 @@ import (
 	"github.com/Gokhan-Uysal/ConfigBay.git/internal/adapter/db"
 	"github.com/Gokhan-Uysal/ConfigBay.git/internal/adapter/repo"
 	"github.com/Gokhan-Uysal/ConfigBay.git/internal/adapter/web/controller"
+	"github.com/Gokhan-Uysal/ConfigBay.git/internal/adapter/web/middleware"
 	"github.com/Gokhan-Uysal/ConfigBay.git/internal/adapter/web/renderer"
 	"github.com/Gokhan-Uysal/ConfigBay.git/internal/config"
 	"github.com/Gokhan-Uysal/ConfigBay.git/internal/core/port"
@@ -112,7 +113,7 @@ func main() {
 	}
 
 	handler := http.NewServeMux()
-	handler.HandleFunc("/", pageController.Home)
+	handler.HandleFunc("/", middleware.RequestLogger(pageController.Home))
 
 	logger.ERR.Fatalln(http.ListenAndServe(":8000", handler))
 }
