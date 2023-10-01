@@ -1,5 +1,5 @@
 {
-  "host": "localhost",
+  "host": "db.configbay",
   "port": 5432,
   "name": "configbay",
   "user": "developer",

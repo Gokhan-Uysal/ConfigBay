@@ -6,6 +6,7 @@ COPY go.mod go.sum Makefile ./
 RUN make install
 
 COPY . ./
+
 ARG GOOS
 ARG GOARCH
 ARG IS_CONTAINER

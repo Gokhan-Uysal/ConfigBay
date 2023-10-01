@@ -33,7 +33,7 @@ build-cli:
 
 compile-ts:
 	@echo "Compiling TS..."
-	@tsc -p $(STATIC_PATH)/script/tsconfig.json
+	@tsc -p ${PWD}/$(STATIC_PATH)/script/tsconfig.json
 	@echo "Compiled!"
 
 run-api:
