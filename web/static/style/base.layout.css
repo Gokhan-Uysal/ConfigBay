@@ -1,5 +1,5 @@
 :root {
-
+    --nav-bg: #C8C8C8
 }
 
 .flex-center {
@@ -10,5 +10,6 @@
 
 .container {
     .flex-center;
+    background-color: var(--nav-bg);
     text-align: center;
 }

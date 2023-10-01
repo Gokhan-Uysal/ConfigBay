@@ -23,7 +23,7 @@ func FilesToPaths(path string) (map[string]string, error) {
 		if dirEntry.IsDir() {
 			continue
 		}
-		
+
 		*filename = dirEntry.Name()
 		*filePath = filepath.Join(path, *filename)
 
