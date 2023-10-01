@@ -2,8 +2,8 @@
   "version": "1.0.0",
   "name": "configbay",
   "host": "127.0.0.1",
-  "port": 8080,
+  "port": 8000,
   "logLevel": "DEBUG",
-  "template": "web/template",
-  "static": "web/static"
+  "template": "web/template/",
+  "static": "web/static/"
 }

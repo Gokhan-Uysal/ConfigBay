@@ -4,6 +4,7 @@ GOOS ?= linux
 GOARCH ?= amd64
 
 APP_NAME = configbay
+STATIC_PATH=web/static
 BASE_API_BIN = $(APP_NAME)-api
 BASE_CLI_BIN = $(APP_NAME)-cli
 API_BIN = $(BASE_API_BIN)-$(GOOS)-$(GOARCH)
@@ -30,6 +31,11 @@ build-cli:
 	@go build -o ${PWD}/$(CLI_BIN) -v -x ${PWD}/cmd/cli/.
 	@echo "Built!"
 
+compile-ts:
+	@echo "Compiling TS..."
+	@tsc -p $(STATIC_PATH)/script/tsconfig.json
+	@echo "Compiled!"
+
 run-api:
 ifeq ($(IS_CONTAINER),False)
 	@echo "Running $(API_BIN) dev..."
@@ -52,7 +58,7 @@ clean-cli:
 	@rm -rf ${PWD}/$(BASE_CLI_BIN)*
 	@echo "Cleaned!"
 
-start-api: build-api run-api
+start-api: compile-ts build-api run-api
 
 rebuild-cli: clean-cli build-cli
 

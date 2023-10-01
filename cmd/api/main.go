@@ -15,6 +15,7 @@ import (
 	"github.com/Gokhan-Uysal/ConfigBay.git/internal/lib/mapper"
 	"net/http"
 	"os"
+	"strconv"
 )
 
 var (
@@ -41,10 +42,6 @@ func init() {
 		logger.ERR.Fatalln(err)
 	}
 	logger.INFO.Println("Configs loaded")
-
-	fmt.Println(apiConf)
-	fmt.Println(dbConf)
-
 }
 
 func main() {
@@ -55,7 +52,7 @@ func main() {
 		userRepo       port.UserRepo
 		userService    port.UserService
 		groupService   port.GroupService
-		projectService port.ProjectService
+		_              port.ProjectService
 		pageController port.PageController
 		err            error
 	)
@@ -67,6 +64,10 @@ func main() {
 		logger.ERR.Fatalln(err)
 	}
 	logger.INFO.Println("Template cache created")
+
+	//Link css and javascript files
+	fs := http.FileServer(http.Dir(apiConf.Static))
+	logger.INFO.Println("File server created")
 
 	//Connect to db
 	dsn := db.MakeDsn(dbConf)
@@ -97,7 +98,7 @@ func main() {
 	if err != nil {
 		logger.ERR.Fatalln(err)
 	}
-	projectService, err = service.NewProjectService(
+	_, err = service.NewProjectService(
 		projectRepo,
 		groupService,
 		userService,
@@ -105,15 +106,18 @@ func main() {
 	if err != nil {
 		logger.ERR.Fatalln(err)
 	}
-	fmt.Println(projectService)
 
+	//Initialize controllers
 	pageController, err = controller.NewPageController(render)
 	if err != nil {
 		logger.ERR.Fatalln(err)
 	}
 
 	handler := http.NewServeMux()
+	staticPath := "/" + apiConf.Static
+	handler.Handle(staticPath, http.StripPrefix(staticPath, fs))
 	handler.HandleFunc("/home", middleware.RequestLogger(pageController.Home))
 
-	logger.ERR.Fatalln(http.ListenAndServe(":8000", handler))
+	url := fmt.Sprintf("%s:%s", apiConf.Host, strconv.Itoa(apiConf.Port))
+	logger.ERR.Fatalln(http.ListenAndServe(url, handler))
 }
