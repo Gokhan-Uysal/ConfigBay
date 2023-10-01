@@ -20,10 +20,10 @@ func New() port.Renderer {
 
 func (r *renderer) Load(path string) error {
 	var (
-		pages       []string
-		componentns []string
-		layouts     []string
-		err         error
+		pages      []string
+		components []string
+		layouts    []string
+		err        error
 	)
 
 	pages, err = r.LoadPageFiles(path)
@@ -36,7 +36,7 @@ func (r *renderer) Load(path string) error {
 		return err
 	}
 
-	componentns, err = r.LoadComponentFiles(path)
+	components, err = r.LoadComponentFiles(path)
 	if err != nil {
 		return err
 	}
@@ -50,7 +50,7 @@ func (r *renderer) Load(path string) error {
 		pageName = filepath.Base(page)
 
 		tmpl = template.New(pageName)
-		tmpl, err = tmpl.ParseFiles(componentns...)
+		tmpl, err = tmpl.ParseFiles(components...)
 		if err != nil {
 			return err
 		}

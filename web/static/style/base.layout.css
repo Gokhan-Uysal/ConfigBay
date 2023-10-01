@@ -1,0 +1,14 @@
+:root {
+
+}
+
+.flex-center {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.container {
+    .flex-center;
+    text-align: center;
+}
