@@ -13,8 +13,9 @@
             {{end}}
         </head>
         <body>
+            {{template "navbar" .}}
+
             <div class="container">
-                {{template "navbar" .}}
 
                 {{block "content" .}}
                 {{end}}

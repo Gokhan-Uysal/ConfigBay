@@ -4,7 +4,11 @@
 }
 
 :root {
+    --body-color: #C8C8C8
+}
 
+body {
+    background-color: var(--body-color);
 }
 
 .flex-center {
@@ -17,4 +21,5 @@
 .container {
     .flex-center;
     text-align: center;
+    margin-inline: 5rem;
 }

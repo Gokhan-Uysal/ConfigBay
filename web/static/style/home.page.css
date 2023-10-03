@@ -1,1 +1,39 @@
 @import "base.layout.css";
+
+:root {
+    --nav-height: 2rem;
+}
+
+.header {
+    margin-top: 5rem;
+    display: grid;
+
+    align-items: center;
+    align-content: center;
+    text-align: justify;
+
+    grid-template-columns: 2fr 1fr;
+    grid-template-rows: 1fr;
+    grid-column-gap: 1rem;
+    grid-row-gap: 1rem;
+
+    padding-inline: var(--navbar-horizontal-padding);
+
+    height: var(--navbar-height);
+}
+
+.header #new-project-btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    height: 60%;
+    width: 80%;
+}
+
+#project-search {
+
+}
+
+.project-list {
+
+}
