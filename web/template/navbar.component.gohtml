@@ -2,14 +2,24 @@
     <link href="/web/static/style/navbar.component.css" rel="stylesheet" type="text/css">
 
     <nav class="">
-        <div class="navbar-nav">
-            <a href="/">Configbay</a>
+        <div id="navbar-nav">
+            <div class="navbar-brand">
+                <a href="/">Configbay</a>
+            </div>
             <div  class="navbar-item">
-                <a aria-current="page" href="/">Home</a>
+                <a aria-current="page" href="/home">Home</a>
             </div>
             <div class="navbar-item">
                 <a href="/projects">Projects</a>
             </div>
+            {{if .IsSigned}}
+                <div class="navbar-item">
+                    <div class="profile-placeholder">
+                        <img id="profile-picture" src="" alt="pp">
+                    </div>
+                </div>
+            {{end}}
         </div>
     </nav>
+    <script src="/web/static/script/navbar.component.js"></script>
 {{end}}

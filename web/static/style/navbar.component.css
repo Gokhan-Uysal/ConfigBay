@@ -1,12 +1,62 @@
 @import "base.layout.css";
 
 :root {
+    --nav-bg: #C8C8C8;
 
+    --navbar-brand-font-size: 2.2rem;
+    --navbar-item-font-size: 1.2rem;
+    --navbar-item-size: calc(var(--navbar-item-font-size) * 3);
+
+    --navbar-height: calc(var(--navbar-item-font-size) * 3);
+    --navbar-horizontal-padding: 15%;
+
+    --items: 0;
 }
 
-.navbar-nav {
-    width: 100%;
+a {
+    text-decoration: none;
+    color: black;
+}
+
+#navbar-nav {
     display: grid;
-    grid-template-columns: 1fr 1fr 1fr;
-    grid-template-rows: 2rem;
+
+    background-color: var(--nav-bg);
+
+    align-items: center;
+    align-content: center;
+    text-align: justify;
+
+    grid-template-columns: 5fr repeat(var(--items), 1fr);
+    grid-template-rows: auto;
+    grid-column-gap: 1rem;
+
+    padding-inline: var(--navbar-horizontal-padding);
+
+    height: var(--navbar-height);
+}
+
+.navbar-brand {
+    font-size: var(--navbar-brand-font-size);
+}
+
+.navbar-item {
+    font-size: var(--navbar-item-font-size);
+}
+
+.profile-placeholder {
+    display: flex;
+    aspect-ratio: 1;
+
+    height: calc(var(--navbar-item-size) * 0.8);
+
+    background-color: wheat;
+    border-radius: 50%;
+    border: thin solid black;
+}
+
+#profile-picture {
+    aspect-ratio: 1;
+    border-radius: 50%;
+    object-fit: fill;
 }
