@@ -38,6 +38,10 @@ a {
 
 .navbar-brand {
     font-size: var(--navbar-brand-font-size);
+    font-family: Source Sans Pro, serif;
+    font-style: normal;
+    font-weight: 700;
+    line-height: normal;
 }
 
 .navbar-item {
