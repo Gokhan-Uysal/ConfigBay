@@ -46,6 +46,7 @@ a {
 
 .navbar-item {
     font-size: var(--navbar-item-font-size);
+    justify-self: end;
 }
 
 .profile-placeholder {

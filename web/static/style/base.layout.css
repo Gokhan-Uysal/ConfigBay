@@ -21,5 +21,6 @@ body {
 .container {
     .flex-center;
     text-align: center;
-    margin-inline: 6rem;
+    max-width: 70%;
+    margin-inline: auto;
 }
