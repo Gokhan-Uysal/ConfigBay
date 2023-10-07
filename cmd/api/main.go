@@ -120,4 +120,5 @@ func main() {
 
 	url := fmt.Sprintf("%s:%s", apiConf.Host, strconv.Itoa(apiConf.Port))
 	logger.ERR.Fatalln(http.ListenAndServe(url, handler))
+
 }

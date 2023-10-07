@@ -20,22 +20,22 @@
     height: var(--navbar-height);
 }
 
-@media only screen and (max-width: 860px) {
+@media only screen and (max-width: 1300px) {
     #project-item-title {
-        font-size: 16px;
+        font-size: 20px;
     }
 
     #project-item-description {
-        font-size: 8px;
+        font-size: 10px;
     }
 }
 
-@media only screen and (min-width: 860px) {
+@media only screen and (min-width: 1300px) {
     #project-item-title {
         font-size: 28px;
     }
 
-    #project-item-description #project-group #project-user {
+    #project-item-description {
         font-size: 14px;
     }
 }
@@ -86,26 +86,29 @@
 
     display: grid;
 
-    grid-template-columns: 2fr 1fr 1fr 1fr;
+    grid-template-columns: 1fr 1fr 1fr 1fr;
     grid-template-rows: 1fr;
 
     margin-top: 0.2rem;
     margin-bottom: 0.2rem;
 
     align-items: center;
-    justify-items: center;
+    align-content: center;
+    justify-content: center;
 }
 
-.project-list-item .project-item {
+.project-list-item .project-info {
     display: inline-grid;
 
     grid-template-columns: 1fr 2fr;
     grid-template-rows: 1fr;
+    grid-column-gap: 0.2rem;
 
+    justify-items: center;
     align-items: center;
 }
 
-.project-item #project-item-picture {
+.project-info #project-item-picture {
     display: flex;
     aspect-ratio: 1;
 
@@ -116,7 +119,7 @@
     border: thin solid black;
 }
 
-.project-item #project-item-info {
+.project-info #project-item-info {
     display: inline-grid;
 
     grid-template-rows: 2fr 1fr;
@@ -129,11 +132,11 @@
     line-height: normal;
 }
 
-.project-item #project-item-title {
+.project-info #project-item-title {
     font-weight: 700;
 }
 
-.project-item #project-item-description {
+.project-info #project-item-description {
     font-weight: 300;
 }
 
