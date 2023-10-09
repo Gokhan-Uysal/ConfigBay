@@ -22,18 +22,18 @@ test:
 build-api:
 	@echo "Building api..."
 	@env CGO_ENABLED=0
-	@go build -o ${PWD}/$(API_BIN) -v -x ${PWD}/cmd/api/.
+	@go build -o $(PWD)/$(API_BIN) -v -x $(PWD)/cmd/api/.
 	@echo "Built!"
 
 build-cli:
 	@echo "Building cli..."
 	@env CGO_ENABLED=0
-	@go build -o ${PWD}/$(CLI_BIN) -v -x ${PWD}/cmd/cli/.
+	@go build -o $(PWD)/$(CLI_BIN) -v -x $(PWD)/cmd/cli/.
 	@echo "Built!"
 
 compile-ts:
 	@echo "Compiling TS..."
-	@tsc -p ${PWD}/$(STATIC_PATH)/script/tsconfig.json
+	@tsc -p $(PWD)/$(STATIC_PATH)/script/tsconfig.json
 	@echo "Compiled!"
 
 run-api:
@@ -49,13 +49,13 @@ endif
 clean-api:
 	@echo "Cleaning..."
 	@go clean
-	@rm -rf ${PWD}/$(BASE_API_BIN)*
+	@rm -rf $(PWD)/$(BASE_API_BIN)*
 	@echo "Cleaned!"
 
 clean-cli:
 	@echo "Cleaning..."
 	@go clean
-	@rm -rf ${PWD}/$(BASE_CLI_BIN)*
+	@rm -rf $(PWD)/$(BASE_CLI_BIN)*
 	@echo "Cleaned!"
 
 start-api: compile-ts build-api run-api

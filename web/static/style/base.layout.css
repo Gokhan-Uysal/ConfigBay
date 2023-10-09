@@ -1,26 +1,58 @@
-* {
-    margin: 0;
-    padding: 0;
-}
-
 :root {
-    --body-color: #C8C8C8
+    --body-color: #C8C8C8;
+    --container-width: 720px;
+    font-size: 100%;
 }
 
 body {
     background-color: var(--body-color);
+    font-size: 1rem;
+    margin: 0;
+    padding: 0;
+}
+
+h1 {
+    font-size: 3rem;
+    font-family: Source Sans Pro, serif;
+    font-style: normal;
+    font-weight: 700;
+    line-height: normal;
+}
+
+h2 {
+    font-size: 2.5rem;
+}
+
+h3 {
+    font-size: 2rem;
+}
+
+h4 {
+    font-size: 1.5rem;
+}
+
+h5 {
+    font-size: 1rem;
+}
+
+h6 {
+    font-size: 1rem;
+}
+
+p {
+    font-size: 0.5rem;
 }
 
 .flex-center {
     display: flex;
     justify-content: center;
-    align-items: center;
+    justify-items: center;
     align-content: center;
+    align-items: center;
 }
 
 .container {
-    .flex-center;
-    text-align: center;
-    max-width: 70%;
+    width: 90%;
+    max-width: var(--container-width);
     margin-inline: auto;
 }

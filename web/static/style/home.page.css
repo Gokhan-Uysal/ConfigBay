@@ -20,26 +20,6 @@
     height: var(--navbar-height);
 }
 
-@media only screen and (max-width: 1300px) {
-    #project-item-title {
-        font-size: 20px;
-    }
-
-    #project-item-description {
-        font-size: 10px;
-    }
-}
-
-@media only screen and (min-width: 1300px) {
-    #project-item-title {
-        font-size: 28px;
-    }
-
-    #project-item-description {
-        font-size: 14px;
-    }
-}
-
 .header #projects-title {
     font-family: Inika, serif;
     font-size: 36px;
@@ -81,62 +61,52 @@
     border-bottom: thin solid black;
 }
 
-.project-list .project-list-item {
+.project-list-item {
     height: 5rem;
 
     display: grid;
 
-    grid-template-columns: 1fr 1fr 1fr 1fr;
-    grid-template-rows: 1fr;
+    grid-template-columns: 2fr 1fr 1fr 1fr;
+    grid-template-rows: 100%;
 
-    margin-top: 0.2rem;
-    margin-bottom: 0.2rem;
-
-    align-items: center;
-    align-content: center;
-    justify-content: center;
+    margin-top: 0.2em;
+    margin-bottom: 0.2em;
 }
 
-.project-list-item .project-info {
+.project-info {
     display: inline-grid;
 
+    height: 100%;
     grid-template-columns: 1fr 2fr;
-    grid-template-rows: 1fr;
-    grid-column-gap: 0.2rem;
+    grid-template-rows: 100%;
 
     justify-items: center;
     align-items: center;
 }
 
-.project-info #project-item-picture {
-    display: flex;
+#project-item-picture {
+    height: 70%;
     aspect-ratio: 1;
-
-    height: calc(var(--navbar-item-size) * 0.8);
     background-color: wheat;
-
     border-radius: 50%;
     border: thin solid black;
 }
 
-.project-info #project-item-info {
+#project-item-info {
     display: inline-grid;
 
     grid-template-rows: 2fr 1fr;
     grid-template-columns: 1fr;
 
     text-align: justify;
-
-    font-family: Source Sans Pro, serif;
-    font-style: normal;
-    line-height: normal;
+    justify-self: start;
 }
 
-.project-info #project-item-title {
+#project-item-title {
     font-weight: 700;
 }
 
-.project-info #project-item-description {
+#project-item-description {
     font-weight: 300;
 }
 

@@ -3,11 +3,7 @@
 :root {
     --nav-bg: #FAFAFA;
 
-    --navbar-brand-font-size: 2.2rem;
-    --navbar-item-font-size: 1.2rem;
-    --navbar-item-size: calc(var(--navbar-item-font-size) * 3);
-
-    --navbar-height: calc(var(--navbar-item-font-size) * 3);
+    --navbar-height: 4rem;
     --navbar-horizontal-padding: 15%;
 
     --items: 0;
@@ -28,7 +24,7 @@ a {
     text-align: justify;
 
     grid-template-columns: 5fr repeat(var(--items), 1fr);
-    grid-template-rows: auto;
+    grid-template-rows: 100%;
     grid-column-gap: 1rem;
 
     padding-inline: var(--navbar-horizontal-padding);
@@ -37,24 +33,19 @@ a {
 }
 
 .navbar-brand {
-    font-size: var(--navbar-brand-font-size);
-    font-family: Source Sans Pro, serif;
-    font-style: normal;
-    font-weight: 700;
-    line-height: normal;
+    height: 100%;
+
+    justify-self: start;
 }
 
 .navbar-item {
-    font-size: var(--navbar-item-font-size);
     justify-self: end;
+    height: 100%;
 }
 
 .profile-placeholder {
-    display: flex;
+    height: 70%;
     aspect-ratio: 1;
-
-    height: calc(var(--navbar-item-size) * 0.8);
-
     background-color: wheat;
     border-radius: 50%;
     border: thin solid black;
