@@ -56,3 +56,66 @@ p {
     max-width: var(--container-width);
     margin-inline: auto;
 }
+
+.row {
+    display: flex;
+    flex-direction: column;
+    margin-inline: 1em;
+}
+
+.center {
+    justify-content: space-between;
+    align-items: center;
+}
+
+.col {
+
+}
+
+.col .col-12 {
+    width: 96%;
+}
+
+.col .col-11 {
+    width: 88%;
+}
+
+.col .col-10 {
+    width: 80%;
+}
+
+.col .col-9 {
+    width: 72%;
+}
+
+.col .col-8 {
+    width: 64%;
+}
+
+.col .col-7 {
+    width: 56%;
+}
+
+.col .col-6 {
+    width: 48%;
+}
+
+.col .col-5 {
+    width: 40%;
+}
+
+.col .col-4 {
+    width: 32%;
+}
+
+.col .col-3 {
+    width: 24%;
+}
+
+.col .col-2 {
+    width: 16%;
+}
+
+.col .col-1 {
+    width: 8%;
+}
