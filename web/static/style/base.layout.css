@@ -1,14 +1,18 @@
+* {
+    margin: 0;
+    padding: 0;
+}
+
 :root {
     --body-color: #C8C8C8;
-    --container-width: 720px;
+    --container-width: 920px;
     font-size: 100%;
+
 }
 
 body {
     background-color: var(--body-color);
     font-size: 1rem;
-    margin: 0;
-    padding: 0;
 }
 
 h1 {
@@ -57,15 +61,15 @@ p {
     margin-inline: auto;
 }
 
+.center {
+    justify-content: space-between;
+    align-items: center;
+}
+
 .row {
     display: flex;
     flex-direction: column;
     margin-inline: 1em;
-}
-
-.center {
-    justify-content: space-between;
-    align-items: center;
 }
 
 .col {
@@ -118,4 +122,16 @@ p {
 
 .col .col-1 {
     width: 8%;
+}
+
+@media screen and (max-width: 500px) {
+    :root {
+        font-size: 80%;
+    }
+}
+
+@media screen and (max-width: 350px) {
+    :root {
+        font-size: 50%;
+    }
 }

@@ -1,8 +1,8 @@
 {{define "navbar"}}
     <link href="/web/static/style/navbar.component.css" rel="stylesheet" type="text/css">
 
-    <nav class="">
-        <div id="navbar-nav">
+    <nav>
+        <div class="container" id="navbar-nav">
             <div class="navbar-brand flex-center">
                 <h1>
                     <a href="/">Configbay</a>
@@ -14,13 +14,11 @@
             <div class="navbar-item flex-center">
                 <a href="/projects">Projects</a>
             </div>
-            {{if .IsSigned}}
-                <div class="navbar-item flex-center">
-                    <div class="profile-placeholder flex-center">
-                        <img id="profile-picture" src="" alt="Pp">
-                    </div>
+            <div class="navbar-item flex-center">
+                <div class="profile-placeholder flex-center">
+                    <img id="profile-picture" src="" alt="Pp">
                 </div>
-            {{end}}
+            </div>
         </div>
     </nav>
 
