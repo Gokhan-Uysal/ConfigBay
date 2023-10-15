@@ -31,11 +31,6 @@ build-cli:
 	@go build -o $(PWD)/$(CLI_BIN) -v -x $(PWD)/cmd/cli/.
 	@echo "Built!"
 
-compile-ts:
-	@echo "Compiling TS..."
-	@tsc -p $(PWD)/$(STATIC_PATH)/script/tsconfig.json
-	@echo "Compiled!"
-
 run-api:
 ifeq ($(IS_CONTAINER),False)
 	@echo "Running $(API_BIN) dev..."
@@ -58,7 +53,7 @@ clean-cli:
 	@rm -rf $(PWD)/$(BASE_CLI_BIN)*
 	@echo "Cleaned!"
 
-start-api: compile-ts build-api run-api
+start-api: build-api run-api
 
 rebuild-cli: clean-cli build-cli
 

@@ -8,7 +8,9 @@
             <title>Configbay</title>
 
             <link rel="stylesheet" href="/web/static/style/navbar.component.css" type="text/css">
-            <script src="https://kit.fontawesome.com/1cb93d95c7.js" crossorigin="anonymous"></script>
+
+            {{block "header-script". }}
+            {{end}}
 
             {{block "style" .}}
             {{end}}
@@ -17,7 +19,6 @@
             {{template "navbar" .}}
 
             <div class="container">
-
                 {{block "content" .}}
                 {{end}}
 
