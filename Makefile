@@ -4,6 +4,7 @@ GOOS ?= linux
 GOARCH ?= amd64
 
 APP_NAME = configbay
+STATIC_PATH=web/static
 BASE_API_BIN = $(APP_NAME)-api
 BASE_CLI_BIN = $(APP_NAME)-cli
 API_BIN = $(BASE_API_BIN)-$(GOOS)-$(GOARCH)
@@ -21,13 +22,13 @@ test:
 build-api:
 	@echo "Building api..."
 	@env CGO_ENABLED=0
-	@go build -o ${PWD}/$(API_BIN) -v -x ${PWD}/cmd/api/.
+	@go build -o $(PWD)/$(API_BIN) -v -x $(PWD)/cmd/api/.
 	@echo "Built!"
 
 build-cli:
 	@echo "Building cli..."
 	@env CGO_ENABLED=0
-	@go build -o ${PWD}/$(CLI_BIN) -v -x ${PWD}/cmd/cli/.
+	@go build -o $(PWD)/$(CLI_BIN) -v -x $(PWD)/cmd/cli/.
 	@echo "Built!"
 
 run-api:
@@ -43,13 +44,13 @@ endif
 clean-api:
 	@echo "Cleaning..."
 	@go clean
-	@rm -rf ${PWD}/$(BASE_API_BIN)*
+	@rm -rf $(PWD)/$(BASE_API_BIN)*
 	@echo "Cleaned!"
 
 clean-cli:
 	@echo "Cleaning..."
 	@go clean
-	@rm -rf ${PWD}/$(BASE_CLI_BIN)*
+	@rm -rf $(PWD)/$(BASE_CLI_BIN)*
 	@echo "Cleaned!"
 
 start-api: build-api run-api

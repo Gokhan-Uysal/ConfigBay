@@ -8,9 +8,9 @@ import (
 
 func JSON[data interface{}](path string) (*data, error) {
 	var (
-		err   error
 		bytes []byte
 		model = new(data)
+		err   error
 	)
 
 	bytes, err = os.ReadFile(path)

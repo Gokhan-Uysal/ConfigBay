@@ -2,26 +2,32 @@ package aggregate
 
 import (
 	"github.com/Gokhan-Uysal/ConfigBay.git/internal/core/domain/common/model"
-	"github.com/Gokhan-Uysal/ConfigBay.git/internal/core/domain/entity"
 	"github.com/Gokhan-Uysal/ConfigBay.git/internal/core/domain/valueobject"
+	"slices"
 	"time"
 )
 
 type (
 	GroupBuilder interface {
+		Role(role valueobject.Role) GroupBuilder
 		Users(...valueobject.UserID) GroupBuilder
-		Roles(...entity.Role) GroupBuilder
 		CreatedAt(time.Time) GroupBuilder
 		UpdatedAt(time.Time) GroupBuilder
 		model.Builder[Group]
 	}
 
 	Group interface {
-		model.BaseAggregate
+		Id() valueobject.GroupID
 		Title() string
+		RolePermissions() []valueobject.Permission
+		RoleName() string
 		Users() []valueobject.UserID
-		Roles() []entity.Role
-		AddUser(user valueobject.UserID)
+		ProjectId() valueobject.ProjectID
+		CreatedAt() time.Time
+		UpdatedAt() time.Time
+		SetRole(role valueobject.Role)
+		AddUsers(...valueobject.UserID)
+		HasPermission(valueobject.Permission) bool
 	}
 
 	groupBuilder struct {
@@ -29,16 +35,22 @@ type (
 	}
 
 	group struct {
-		*baseAggregate
-		title string
-		users []valueobject.UserID
-		roles []entity.Role
+		id        valueobject.GroupID
+		title     string
+		role      valueobject.Role
+		users     []valueobject.UserID
+		projectId valueobject.ProjectID
+		createdAt time.Time
+		updatedAt time.Time
 	}
 )
 
-func NewGroupBuilder(id valueobject.GroupID, title string) GroupBuilder {
-	base := newBaseAggregate(id)
-	return &groupBuilder{group{baseAggregate: base, title: title}}
+func NewGroupBuilder(
+	id valueobject.GroupID,
+	title string,
+	projectId valueobject.ProjectID,
+) GroupBuilder {
+	return &groupBuilder{group{id: id, title: title, projectId: projectId}}
 }
 
 func (gb *groupBuilder) Users(users ...valueobject.UserID) GroupBuilder {
@@ -46,8 +58,8 @@ func (gb *groupBuilder) Users(users ...valueobject.UserID) GroupBuilder {
 	return gb
 }
 
-func (gb *groupBuilder) Roles(roles ...entity.Role) GroupBuilder {
-	gb.roles = roles
+func (gb *groupBuilder) Role(role valueobject.Role) GroupBuilder {
+	gb.role = role
 	return gb
 }
 
@@ -63,11 +75,18 @@ func (gb *groupBuilder) UpdatedAt(time time.Time) GroupBuilder {
 
 func (gb *groupBuilder) Build() Group {
 	return &group{
-		baseAggregate: gb.baseAggregate,
-		title:         gb.title,
-		users:         gb.users,
-		roles:         gb.roles,
+		id:        gb.id,
+		title:     gb.title,
+		role:      gb.role,
+		users:     gb.users,
+		projectId: gb.projectId,
+		createdAt: gb.createdAt,
+		updatedAt: gb.updatedAt,
 	}
+}
+
+func (g *group) Id() valueobject.GroupID {
+	return g.id
 }
 
 func (g *group) Title() string {
@@ -78,14 +97,34 @@ func (g *group) Users() []valueobject.UserID {
 	return g.users
 }
 
-func (g *group) Roles() []entity.Role {
-	return g.roles
+func (g *group) RoleName() string {
+	return g.role.Name()
 }
 
-func (g *group) AddUser(user valueobject.UserID) {
-	g.users = append(g.users, user)
+func (g *group) RolePermissions() []valueobject.Permission {
+	return g.role.Permissions()
 }
 
-func (g *group) AddRole(role entity.Role) {
-	g.roles = append(g.roles, role)
+func (g *group) ProjectId() valueobject.ProjectID {
+	return g.projectId
+}
+
+func (g *group) SetRole(role valueobject.Role) {
+	g.role = role
+}
+
+func (g *group) AddUsers(users ...valueobject.UserID) {
+	g.users = append(g.users, users...)
+}
+
+func (g *group) HasPermission(p valueobject.Permission) bool {
+	return slices.Contains(g.role.Permissions(), p)
+}
+
+func (g *group) CreatedAt() time.Time {
+	return g.createdAt
+}
+
+func (g *group) UpdatedAt() time.Time {
+	return g.updatedAt
 }

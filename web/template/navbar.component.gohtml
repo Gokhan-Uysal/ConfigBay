@@ -1,0 +1,26 @@
+{{define "navbar"}}
+    <link href="/web/static/style/navbar.component.css" rel="stylesheet" type="text/css">
+
+    <nav>
+        <div class="container" id="navbar-nav">
+            <div class="navbar-brand flex-center">
+                <h1>
+                    <a href="/">Configbay</a>
+                </h1>
+            </div>
+            <div  class="navbar-item flex-center">
+                <a aria-current="page" href="/home">Home</a>
+            </div>
+            <div class="navbar-item flex-center">
+                <a href="/projects">Projects</a>
+            </div>
+            <div class="navbar-item flex-center">
+                <div class="profile-placeholder flex-center">
+                    <img id="profile-picture" src="" alt="Pp">
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <script type="module" src="/web/static/script/navbar.component.mjs"></script>
+{{end}}

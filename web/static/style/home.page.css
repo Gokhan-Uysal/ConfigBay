@@ -1,0 +1,102 @@
+@import "base.layout.css";
+
+:root {
+    --nav-height: 2rem;
+    --font-size: 1rem;
+}
+
+.header {
+    margin-top: 5rem;
+    display: grid;
+
+    align-items: center;
+    align-content: center;
+    text-align: justify;
+
+    grid-template-columns: 3fr 1fr;
+    grid-template-rows: 100%;
+    grid-column-gap: 1rem;
+
+    height: var(--navbar-height);
+}
+
+.header #projects-title {
+    font-family: Inika, serif;
+    font-style: normal;
+    font-weight: 400;
+    line-height: normal;
+}
+
+.header #new-project-btn {
+    display: inline-grid;
+
+    grid-template-columns: 1fr 4fr;
+    grid-template-rows: 100%;
+
+    align-items: center;
+    justify-self: end;
+
+    min-height: 50%;
+
+    min-width: 8rem;
+    font-size: 0.8rem;
+}
+
+#project-search {
+    width: 100%;
+    height: 1.5rem;
+    border: thin solid black;
+    border-radius: 5px;
+}
+
+.project-list {
+    margin-top: 1rem;
+
+    display: grid;
+
+    grid-template-columns: 1fr;
+    grid-template-rows: auto;
+
+    border-top: thin solid black;
+    border-bottom: thin solid black;
+}
+
+.project-list-item {
+    height: 5rem;
+
+    display: grid;
+
+    grid-template-columns: 1fr 1fr 1fr 1fr;
+    grid-template-rows: 100%;
+
+    margin-top: 0.2em;
+    margin-bottom: 0.2em;
+}
+
+.project-info {
+    display: grid;
+
+    height: 100%;
+    grid-template-columns: 1fr 2fr;
+    grid-template-rows: 100%;
+
+    justify-items: center;
+    align-items: center;
+}
+
+#project-item-picture {
+    height: 3rem;
+    aspect-ratio: 1;
+    background-color: wheat;
+    border-radius: 50%;
+    border: thin solid black;
+}
+
+#project-item-info {
+    flex-direction: row;
+    justify-content: start;
+}
+
+#project-user {
+
+}

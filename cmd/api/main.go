@@ -4,16 +4,18 @@ import (
 	"fmt"
 	"github.com/Gokhan-Uysal/ConfigBay.git/internal/adapter/db"
 	"github.com/Gokhan-Uysal/ConfigBay.git/internal/adapter/repo"
+	"github.com/Gokhan-Uysal/ConfigBay.git/internal/adapter/web/controller"
+	"github.com/Gokhan-Uysal/ConfigBay.git/internal/adapter/web/middleware"
+	"github.com/Gokhan-Uysal/ConfigBay.git/internal/adapter/web/renderer"
 	"github.com/Gokhan-Uysal/ConfigBay.git/internal/config"
-	"github.com/Gokhan-Uysal/ConfigBay.git/internal/core/domain/aggregate"
-	"github.com/Gokhan-Uysal/ConfigBay.git/internal/core/domain/valueobject"
 	"github.com/Gokhan-Uysal/ConfigBay.git/internal/core/port"
 	"github.com/Gokhan-Uysal/ConfigBay.git/internal/core/service"
-	"github.com/Gokhan-Uysal/ConfigBay.git/internal/lib/generator"
 	"github.com/Gokhan-Uysal/ConfigBay.git/internal/lib/loader"
 	"github.com/Gokhan-Uysal/ConfigBay.git/internal/lib/logger"
 	"github.com/Gokhan-Uysal/ConfigBay.git/internal/lib/mapper"
+	"net/http"
 	"os"
+	"strconv"
 )
 
 var (
@@ -32,23 +34,40 @@ func init() {
 
 	//Mapping configs to structs
 	apiConf, err = loader.JSON[config.Api](configs["api_config.json"])
+	if err != nil {
+		logger.ERR.Fatalln(err)
+	}
 	dbConf, err = loader.JSON[config.Db](configs["db_config.json"])
 	if err != nil {
 		logger.ERR.Fatalln(err)
 	}
 	logger.INFO.Println("Configs loaded")
-	fmt.Println(apiConf)
-	fmt.Println(dbConf)
 }
 
 func main() {
 	var (
+		render         port.Renderer
 		projectRepo    port.ProjectRepo
 		groupRepo      port.GroupRepo
 		userRepo       port.UserRepo
-		projectService port.ProjectService
+		userService    port.UserService
+		groupService   port.GroupService
+		_              port.ProjectService
+		pageController port.PageController
 		err            error
 	)
+
+	//Generate html template cache
+	render = renderer.New()
+	err = render.Load(apiConf.Template)
+	if err != nil {
+		logger.ERR.Fatalln(err)
+	}
+	logger.INFO.Println("Template cache created")
+
+	//Link css and javascript files
+	fs := http.FileServer(http.Dir(apiConf.Static))
+	logger.INFO.Println("File server created")
 
 	//Connect to db
 	dsn := db.MakeDsn(dbConf)
@@ -56,7 +75,7 @@ func main() {
 	logger.INFO.Println("Db connected")
 	_ = DB.Ping()
 
-	//Init repos
+	//Initialize repositories
 	projectRepo, err = repo.NewProjectRepo(DB)
 	if err != nil {
 		logger.ERR.Fatalln(err)
@@ -70,31 +89,36 @@ func main() {
 		logger.ERR.Fatalln(err)
 	}
 
-	//Init services
-	projectService, err = service.NewProjectService(
+	//Initialize services
+	userService, err = service.NewUserService(userRepo)
+	if err != nil {
+		logger.ERR.Fatalln(err)
+	}
+	groupService, err = service.NewGroupService(groupRepo)
+	if err != nil {
+		logger.ERR.Fatalln(err)
+	}
+	_, err = service.NewProjectService(
 		projectRepo,
-		groupRepo,
-		userRepo,
+		groupService,
+		userService,
 	)
 	if err != nil {
 		logger.ERR.Fatalln(err)
 	}
 
-	user := aggregate.NewUserBuilder(
-		generator.UUID(),
-		"john",
-		valueobject.NewEmail("guysal20@ku.edu.tr"),
-	).Build()
-
-	_, err = userRepo.Save(user)
+	//Initialize controllers
+	pageController, err = controller.NewPageController(render)
 	if err != nil {
 		logger.ERR.Fatalln(err)
 	}
 
-	project, err := projectService.Init(user.Id(), "Campus", "Admins")
-	if err != nil {
-		logger.ERR.Fatalln(err)
-	}
+	handler := http.NewServeMux()
+	staticPath := "/" + apiConf.Static
+	handler.Handle(staticPath, http.StripPrefix(staticPath, fs))
+	handler.HandleFunc("/home", middleware.RequestLogger(pageController.Home))
 
-	fmt.Println(project)
+	url := fmt.Sprintf("%s:%s", apiConf.Host, strconv.Itoa(apiConf.Port))
+	logger.ERR.Fatalln(http.ListenAndServe(url, handler))
+
 }
