@@ -31,6 +31,9 @@ const checkUrl = (url) => {
     if (typeof url === "string") {
         return;
     }
+    if (url.startsWith("/")) {
+        return;
+    }
     throw new Error("Invalid url.")
 }
 
