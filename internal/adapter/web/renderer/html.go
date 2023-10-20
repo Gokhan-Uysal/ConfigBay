@@ -64,7 +64,6 @@ func (r *renderer) Load(path string) error {
 		}
 
 		r.templates[pageName] = tmpl
-		fmt.Println(r.templates[pageName], "\t", tmpl)
 	}
 	return nil
 }

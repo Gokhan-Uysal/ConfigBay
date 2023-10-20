@@ -1,4 +1,4 @@
-package model
+package payload
 
 type HTTPError struct {
 	StatusCode    int

@@ -19,10 +19,11 @@ import (
 )
 
 var (
-	configs = make(map[string]string)
-	apiConf *config.Api
-	dbConf  *config.Db
-	err     error
+	configs    = make(map[string]string)
+	apiConf    *config.Api
+	dbConf     *config.Db
+	googleConf *config.Google
+	err        error
 )
 
 func init() {
@@ -38,6 +39,10 @@ func init() {
 		logger.ERR.Fatalln(err)
 	}
 	dbConf, err = loader.JSON[config.Db](configs["db_config.json"])
+	if err != nil {
+		logger.ERR.Fatalln(err)
+	}
+	googleConf, err = loader.JSON[config.Google](configs["google_sso_config.json"])
 	if err != nil {
 		logger.ERR.Fatalln(err)
 	}
