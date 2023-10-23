@@ -3,6 +3,7 @@ services:
     image: postgres:16-bullseye
     restart: always
     container_name: db.configbay
+    hostname: db.configbay
     environment:
       POSTGRES_DB: ${POSTGRES_DB}
       POSTGRES_USER: ${POSTGRES_USER}
@@ -13,7 +14,7 @@ services:
       - db_volume:/var/lib/postgresql/data
       - ../asset/sql:/docker-entrypoint-initdb.d
     ports:
-      - "5432:5432"
+      - 5432:5432
 
   api.configbay:
     depends_on:
@@ -22,22 +23,25 @@ services:
       context: ../
       dockerfile: Dockerfile
       args:
-        GOOS: linux
-        GOARCH: amd64
         GO_VERSION: 1.21
+        GOOS: ${GOOS}
+        GOARCH: ${GOARCH}
     container_name: api.configbay
+    hostname: api.configbay
     environment:
+      GOOS: ${GOOS}
+      GOARCH: ${GOARCH}
+      IS_CONTAINER: ${IS_CONTAINER}
       CONF_PATH: ${CONF_PATH}
       DB_NAME: ${POSTGRES_DB}
       DB_USER: ${POSTGRES_USER}
       DB_PASSWORD: ${POSTGRES_PASSWORD}
-      IS_CONTAINER: ${IS_CONTAINER}
     networks:
       - backend_bridge
     volumes:
       - api_volume:/etc/runtime/configbay
     ports:
-      - "8000:8000"
+      - 8000:8000
 
 volumes:
   api_volume:
