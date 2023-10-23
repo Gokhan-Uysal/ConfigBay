@@ -24,13 +24,14 @@ services:
       args:
         GOOS: linux
         GOARCH: amd64
-        IS_CONTAINER: True
+        GO_VERSION: 1.21
     container_name: api.configbay
     environment:
       CONF_PATH: ${CONF_PATH}
       DB_NAME: ${POSTGRES_DB}
       DB_USER: ${POSTGRES_USER}
       DB_PASSWORD: ${POSTGRES_PASSWORD}
+      IS_CONTAINER: ${IS_CONTAINER}
     networks:
       - backend_bridge
     volumes:
