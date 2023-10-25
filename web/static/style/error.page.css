@@ -1,0 +1,6 @@
+@import "base.layout.css";
+
+a {
+    text-decoration: none;
+    color: black;
+}

@@ -32,14 +32,19 @@ func (pc pageController) Home(w http.ResponseWriter, r *http.Request) {
 }
 
 func (pc pageController) SignUp(w http.ResponseWriter, r *http.Request) {
-	err := pc.renderer.Render("signup.page.gohtml", w, nil)
-	if err != nil {
+	if err := pc.renderer.Render("signup.page.gohtml", w, nil); err == nil {
 		return
 	}
+
+	pc.handleError(w, payload.InternalServerErr)
 }
 
 func (pc pageController) Login(w http.ResponseWriter, r *http.Request) {
+	if err := pc.renderer.Render("login.page.gohtml", w, nil); err == nil {
+		return
+	}
 
+	pc.handleError(w, payload.InternalServerErr)
 }
 
 func (pc pageController) handleError(w http.ResponseWriter, httpErr payload.HTTPError) {

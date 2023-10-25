@@ -122,6 +122,8 @@ func main() {
 	staticPath := "/" + apiConf.Static
 	handler.Handle(staticPath, http.StripPrefix(staticPath, fs))
 	handler.Handle("/home", middleware.Get(http.HandlerFunc(pageController.Home)))
+	handler.Handle("/signup", middleware.Get(http.HandlerFunc(pageController.SignUp)))
+	handler.Handle("/login", middleware.Get(http.HandlerFunc(pageController.Login)))
 
 	url := fmt.Sprintf("%s:%s", apiConf.Host, strconv.Itoa(apiConf.Port))
 	logger.ERR.Fatalln(http.ListenAndServe(url, handler))
