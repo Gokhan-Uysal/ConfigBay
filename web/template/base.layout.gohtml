@@ -7,8 +7,6 @@
             <meta http-equiv="X-UA-Compatible" content="ie=edge">
             <title>Configbay</title>
 
-            <link rel="stylesheet" href="/web/static/style/navbar.component.css" type="text/css">
-
             {{block "header-script". }}
             {{end}}
 
@@ -16,14 +14,8 @@
             {{end}}
         </head>
         <body>
-            {{template "navbar" .}}
-
-            <div class="container">
-                {{block "content" .}}
-                {{end}}
-
-                {{template "footer" .}}
-            </div>
+            {{block "content" .}}
+            {{end}}
 
             {{block "script" .}}
             {{end}}

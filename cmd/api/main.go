@@ -76,7 +76,7 @@ func main() {
 
 	//Connect to db
 	dsn := db.MakeDsn(dbConf)
-	DB := db.Init("postgres", dsn)
+	DB := db.Init(dbConf.Driver, dsn)
 	logger.INFO.Println("Db connected")
 	_ = DB.Ping()
 
@@ -121,7 +121,7 @@ func main() {
 	handler := http.NewServeMux()
 	staticPath := "/" + apiConf.Static
 	handler.Handle(staticPath, http.StripPrefix(staticPath, fs))
-	handler.HandleFunc("/home", middleware.RequestLogger(pageController.Home))
+	handler.Handle("/home", middleware.Get(http.HandlerFunc(pageController.Home)))
 
 	url := fmt.Sprintf("%s:%s", apiConf.Host, strconv.Itoa(apiConf.Port))
 	logger.ERR.Fatalln(http.ListenAndServe(url, handler))

@@ -5,9 +5,11 @@ import (
 	"net/http"
 )
 
-func RequestLogger(handler http.HandlerFunc) http.HandlerFunc {
-	return func(rw http.ResponseWriter, r *http.Request) {
-		logger.INFO.Printf("[%s] [%s] %s\n", r.Method, r.RequestURI, r.RemoteAddr)
-		handler(rw, r)
-	}
+func RequestLogger(handler http.Handler) http.Handler {
+	return http.HandlerFunc(
+		func(w http.ResponseWriter, r *http.Request) {
+			logger.INFO.Printf("[%s] [%s] %s\n", r.Method, r.RequestURI, r.RemoteAddr)
+			handler.ServeHTTP(w, r)
+		},
+	)
 }
