@@ -1,55 +1,61 @@
 {{template "base" .}}
 {{define "style"}}
+    <link rel="stylesheet" href="/web/static/style/navbar.component.css" type="text/css">
     <link href="/web/static/style/home.page.css" rel="stylesheet" type="text/css">
     <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@24,400,0,0" />
 {{end}}
+
 {{define "content"}}
-    <div class="header">
-        <h2 id="projects-title">
-            Projects
-        </h2>
-        <button id="new-project-btn">
-            <i class="fa-solid fa-circle-plus" style="color: #000000;"></i>
-            New Project
-        </button>
-    </div>
-    <div>
-        <label>
-            <input type="text" placeholder="    Search..." id="project-search">
-        </label>
-    </div>
-    <div class="project-list">
-        <div class="project-list-item">
-            <div class="project-info">
-                <div class="flex-center" id="project-item-picture">
-                    <img id="profile-picture" src="" alt="Pp">
+    {{template "navbar" .}}
+    <div class="container">
+        <div class="header">
+            <h3 id="projects-title">
+                Projects
+            </h3>
+            <button id="new-project-btn">
+                <i class="fa-solid fa-circle-plus" style="color: #000000;"></i>
+                New Project
+            </button>
+        </div>
+        <div>
+            <label>
+                <input type="text" placeholder="    Search..." id="project-search">
+            </label>
+        </div>
+        <div class="project-list">
+            <div class="project-list-item">
+                <div class="project-info">
+                    <div class="flex-center" id="project-item-picture">
+                        <img id="profile-picture" src="" alt="Pp">
+                    </div>
+                    <div class="row">
+                        <h5 class="col col-12" >
+                            Project Title
+                        </h5>
+                        <p class="col col-12">
+                            Project description...
+                        </p>
+                    </div>
                 </div>
-                <div class="row">
-                    <h5 class="col col-12" >
-                        Project Title
-                    </h5>
-                    <p class="col col-12">
-                        Project description...
-                    </p>
-                </div>
-            </div>
-            <div class="flex-center" id="project-group">
+                <div class="flex-center" id="project-group">
                 <span>
                     5
                 </span>
-            </div>
-            <div class="flex-center" id="project-user">
+                </div>
+                <div class="flex-center" id="project-user">
                 <span>
                     10
                 </span>
-            </div>
-            <div class="flex-center">
+                </div>
+                <div class="flex-center">
                 <span>
                     Oct 6 2023
                 </span>
+                </div>
             </div>
         </div>
     </div>
+    {{template "footer" .}}
 {{end}}
 {{define "script"}}
     <script type="module" src="/web/static/script/home.page.mjs"></script>

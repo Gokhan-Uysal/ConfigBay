@@ -19,10 +19,11 @@ import (
 )
 
 var (
-	configs = make(map[string]string)
-	apiConf *config.Api
-	dbConf  *config.Db
-	err     error
+	configs    = make(map[string]string)
+	apiConf    *config.Api
+	dbConf     *config.Db
+	googleConf *config.Google
+	err        error
 )
 
 func init() {
@@ -38,6 +39,10 @@ func init() {
 		logger.ERR.Fatalln(err)
 	}
 	dbConf, err = loader.JSON[config.Db](configs["db_config.json"])
+	if err != nil {
+		logger.ERR.Fatalln(err)
+	}
+	googleConf, err = loader.JSON[config.Google](configs["google_sso_config.json"])
 	if err != nil {
 		logger.ERR.Fatalln(err)
 	}
@@ -71,7 +76,7 @@ func main() {
 
 	//Connect to db
 	dsn := db.MakeDsn(dbConf)
-	DB := db.Init("postgres", dsn)
+	DB := db.Init(dbConf.Driver, dsn)
 	logger.INFO.Println("Db connected")
 	_ = DB.Ping()
 
@@ -116,7 +121,9 @@ func main() {
 	handler := http.NewServeMux()
 	staticPath := "/" + apiConf.Static
 	handler.Handle(staticPath, http.StripPrefix(staticPath, fs))
-	handler.HandleFunc("/home", middleware.RequestLogger(pageController.Home))
+	handler.Handle("/home", middleware.Get(http.HandlerFunc(pageController.Home)))
+	handler.Handle("/signup", middleware.Get(http.HandlerFunc(pageController.SignUp)))
+	handler.Handle("/login", middleware.Get(http.HandlerFunc(pageController.Login)))
 
 	url := fmt.Sprintf("%s:%s", apiConf.Host, strconv.Itoa(apiConf.Port))
 	logger.ERR.Fatalln(http.ListenAndServe(url, handler))

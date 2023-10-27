@@ -47,6 +47,7 @@
     height: 1.5rem;
     border: thin solid black;
     border-radius: 5px;
+    font-size: .8rem;
 }
 
 .project-list {

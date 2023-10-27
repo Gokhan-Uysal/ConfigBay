@@ -1,10 +1,13 @@
 {{template "base" .}}
+{{define "style"}}
+    <link rel="stylesheet" href="/web/static/style/error.page.css" type="text/css">
+{{end}}
 {{define "content"}}
-    <div class="row">
+    <div class="row flex-center">
         <div class="col-12">
             <br>
             <h2>
-                {{.StatusCode}} {{.StatusMessage}}
+                {{.StatusCode}}: {{.StatusMessage}}
             </h2>
         </div>
         <div class="col-12">

@@ -1,10 +1,9 @@
 package controller
 
 import (
-	"github.com/Gokhan-Uysal/ConfigBay.git/internal/adapter/web/model"
+	"github.com/Gokhan-Uysal/ConfigBay.git/internal/adapter/web/payload"
 	"github.com/Gokhan-Uysal/ConfigBay.git/internal/core/domain/common/errorx"
 	"github.com/Gokhan-Uysal/ConfigBay.git/internal/core/port"
-	"github.com/Gokhan-Uysal/ConfigBay.git/internal/lib/logger"
 	"net/http"
 )
 
@@ -24,32 +23,32 @@ func (pc pageController) Favicon(w http.ResponseWriter, r *http.Request) {
 
 }
 
-func (pc pageController) Home(rw http.ResponseWriter, r *http.Request) {
-	var (
-		httpErr *model.HTTPError
-	)
-
-	if r.Method != http.MethodGet {
-		httpErr = &model.HTTPError{
-			StatusCode:    http.StatusNotFound,
-			StatusMessage: "Page Not Found!",
-		}
-		rw.WriteHeader(http.StatusNotFound)
-
-		if err := pc.renderer.Render("error.page.gohtml", rw, httpErr); err != nil {
-			logger.ERR.Println(err)
-		}
+func (pc pageController) Home(w http.ResponseWriter, r *http.Request) {
+	if err := pc.renderer.Render("home.page.gohtml", w, nil); err == nil {
 		return
 	}
 
-	if err := pc.renderer.Render("home.page.gohtml", rw, nil); err == nil {
+	pc.handleError(w, payload.InternalServerErr)
+}
+
+func (pc pageController) SignUp(w http.ResponseWriter, r *http.Request) {
+	if err := pc.renderer.Render("signup.page.gohtml", w, nil); err == nil {
 		return
 	}
 
-	httpErr = &model.HTTPError{
-		StatusCode: http.StatusInternalServerError, StatusMessage: "Boom!",
+	pc.handleError(w, payload.InternalServerErr)
+}
+
+func (pc pageController) Login(w http.ResponseWriter, r *http.Request) {
+	if err := pc.renderer.Render("login.page.gohtml", w, nil); err == nil {
+		return
 	}
-	if err := pc.renderer.Render("error.page.gohtml", rw, httpErr); err != nil {
-		rw.WriteHeader(http.StatusInternalServerError)
+
+	pc.handleError(w, payload.InternalServerErr)
+}
+
+func (pc pageController) handleError(w http.ResponseWriter, httpErr payload.HTTPError) {
+	if err := pc.renderer.Render("error.page.gohtml", w, httpErr); err != nil {
+		w.WriteHeader(http.StatusInternalServerError)
 	}
 }

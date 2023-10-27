@@ -1,12 +1,11 @@
 IS_CONTAINER ?= False
 
-GOOS ?= linux
+GOOS ?= darwin
 GOARCH ?= amd64
+COMPOSE_PROJECT_NAME ?= configbay
 
-APP_NAME = configbay
-STATIC_PATH=web/static
-BASE_API_BIN = $(APP_NAME)-api
-BASE_CLI_BIN = $(APP_NAME)-cli
+BASE_API_BIN = $(COMPOSE_PROJECT_NAME)-api
+BASE_CLI_BIN = $(COMPOSE_PROJECT_NAME)-cli
 API_BIN = $(BASE_API_BIN)-$(GOOS)-$(GOARCH)
 CLI_BIN = $(BASE_CLI_BIN)-$(GOOS)-$(GOARCH)
 
@@ -22,13 +21,13 @@ test:
 build-api:
 	@echo "Building api..."
 	@env CGO_ENABLED=0
-	@go build -o $(PWD)/$(API_BIN) -v -x $(PWD)/cmd/api/.
+	@go build -o ./$(API_BIN) -v -x ./cmd/api/.
 	@echo "Built!"
 
 build-cli:
 	@echo "Building cli..."
 	@env CGO_ENABLED=0
-	@go build -o $(PWD)/$(CLI_BIN) -v -x $(PWD)/cmd/cli/.
+	@go build -o ./$(CLI_BIN) -v -x ./cmd/cli/.
 	@echo "Built!"
 
 run-api:
@@ -44,13 +43,13 @@ endif
 clean-api:
 	@echo "Cleaning..."
 	@go clean
-	@rm -rf $(PWD)/$(BASE_API_BIN)*
+	@rm -rf ./$(BASE_API_BIN)*
 	@echo "Cleaned!"
 
 clean-cli:
 	@echo "Cleaning..."
 	@go clean
-	@rm -rf $(PWD)/$(BASE_CLI_BIN)*
+	@rm -rf ./$(BASE_CLI_BIN)*
 	@echo "Cleaned!"
 
 start-api: build-api run-api
