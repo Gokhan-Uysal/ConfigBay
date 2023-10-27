@@ -21,13 +21,13 @@ test:
 build-api:
 	@echo "Building api..."
 	@env CGO_ENABLED=0
-	@go build -o $(PWD)/$(API_BIN) -v -x $(PWD)/cmd/api/.
+	@go build -o ./$(API_BIN) -v -x ./cmd/api/.
 	@echo "Built!"
 
 build-cli:
 	@echo "Building cli..."
 	@env CGO_ENABLED=0
-	@go build -o $(PWD)/$(CLI_BIN) -v -x $(PWD)/cmd/cli/.
+	@go build -o ./$(CLI_BIN) -v -x ./cmd/cli/.
 	@echo "Built!"
 
 run-api:
@@ -43,13 +43,13 @@ endif
 clean-api:
 	@echo "Cleaning..."
 	@go clean
-	@rm -rf $(PWD)/$(BASE_API_BIN)*
+	@rm -rf ./$(BASE_API_BIN)*
 	@echo "Cleaned!"
 
 clean-cli:
 	@echo "Cleaning..."
 	@go clean
-	@rm -rf $(PWD)/$(BASE_CLI_BIN)*
+	@rm -rf ./$(BASE_CLI_BIN)*
 	@echo "Cleaned!"
 
 start-api: build-api run-api
