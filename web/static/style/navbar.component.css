@@ -8,10 +8,6 @@
     --items: 0;
 }
 
-a {
-    text-decoration: none;
-    color: black;
-}
 
 nav {
     background-color: var(--nav-bg);
