@@ -131,6 +131,7 @@ func main() {
 	handler.Handle("/signup", middleware.Get(http.HandlerFunc(onboardController.Signup)))
 
 	url := fmt.Sprintf("%s:%s", apiConf.Host, strconv.Itoa(apiConf.Port))
+	logger.INFO.Printf("Server is listening on %s\n", url)
 	logger.ERR.Fatalln(http.ListenAndServe(url, handler))
 
 }

@@ -1,6 +1,6 @@
 {
   "driver": "postgres",
-  "host": "127.0.0.1",
+  "host": "db.configbay",
   "port": 5432,
   "name": "configbay",
   "user": "developer",
