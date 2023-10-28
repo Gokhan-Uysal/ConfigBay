@@ -31,16 +31,8 @@ func (pc pageController) Home(w http.ResponseWriter, r *http.Request) {
 	pc.handleError(w, payload.InternalServerErr)
 }
 
-func (pc pageController) SignUp(w http.ResponseWriter, r *http.Request) {
-	if err := pc.renderer.Render("signup.page.gohtml", w, nil); err == nil {
-		return
-	}
-
-	pc.handleError(w, payload.InternalServerErr)
-}
-
-func (pc pageController) Login(w http.ResponseWriter, r *http.Request) {
-	if err := pc.renderer.Render("login.page.gohtml", w, nil); err == nil {
+func (pc pageController) Root(w http.ResponseWriter, r *http.Request) {
+	if err := pc.renderer.Render("root.page.gohtml", w, nil); err == nil {
 		return
 	}
 

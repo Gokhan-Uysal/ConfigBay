@@ -6,7 +6,7 @@ import (
 )
 
 func Get(handler http.Handler) http.Handler {
-	RequestLogger(handler)
+	handler = RequestLogger(handler)
 	return http.HandlerFunc(
 		func(w http.ResponseWriter, r *http.Request) {
 			if r.Method != http.MethodGet {
@@ -19,7 +19,7 @@ func Get(handler http.Handler) http.Handler {
 }
 
 func Post(handler http.Handler) http.Handler {
-	RequestLogger(handler)
+	handler = RequestLogger(handler)
 	return http.HandlerFunc(
 		func(w http.ResponseWriter, r *http.Request) {
 			if r.Method != http.MethodPost {
@@ -32,7 +32,7 @@ func Post(handler http.Handler) http.Handler {
 }
 
 func Put(handler http.Handler) http.Handler {
-	RequestLogger(handler)
+	handler = RequestLogger(handler)
 	return http.HandlerFunc(
 		func(w http.ResponseWriter, r *http.Request) {
 			if r.Method != http.MethodPut {
@@ -45,7 +45,7 @@ func Put(handler http.Handler) http.Handler {
 }
 
 func Patch(handler http.Handler) http.Handler {
-	RequestLogger(handler)
+	handler = RequestLogger(handler)
 	return http.HandlerFunc(
 		func(w http.ResponseWriter, r *http.Request) {
 			if r.Method != http.MethodPatch {
@@ -58,7 +58,7 @@ func Patch(handler http.Handler) http.Handler {
 }
 
 func Delete(handler http.Handler) http.Handler {
-	RequestLogger(handler)
+	handler = RequestLogger(handler)
 	return http.HandlerFunc(
 		func(w http.ResponseWriter, r *http.Request) {
 			if r.Method != http.MethodDelete {
@@ -71,7 +71,7 @@ func Delete(handler http.Handler) http.Handler {
 }
 
 func Connect(handler http.Handler) http.Handler {
-	RequestLogger(handler)
+	handler = RequestLogger(handler)
 	return http.HandlerFunc(
 		func(w http.ResponseWriter, r *http.Request) {
 			if r.Method != http.MethodConnect {
@@ -84,7 +84,7 @@ func Connect(handler http.Handler) http.Handler {
 }
 
 func Head(handler http.Handler) http.Handler {
-	RequestLogger(handler)
+	handler = RequestLogger(handler)
 	return http.HandlerFunc(
 		func(w http.ResponseWriter, r *http.Request) {
 			if r.Method != http.MethodHead {
@@ -97,7 +97,7 @@ func Head(handler http.Handler) http.Handler {
 }
 
 func Trace(handler http.Handler) http.Handler {
-	RequestLogger(handler)
+	handler = RequestLogger(handler)
 	return http.HandlerFunc(
 		func(w http.ResponseWriter, r *http.Request) {
 			if r.Method != http.MethodOptions {

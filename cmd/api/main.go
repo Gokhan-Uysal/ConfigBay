@@ -19,11 +19,11 @@ import (
 )
 
 var (
-	configs = make(map[string]string)
-	apiConf *config.Api
-	dbConf  *config.Db
-	//googleConf *config.Google
-	err error
+	configs    = make(map[string]string)
+	apiConf    *config.Api
+	dbConf     *config.Db
+	googleConf *config.Google
+	err        error
 )
 
 func init() {
@@ -42,24 +42,25 @@ func init() {
 	if err != nil {
 		logger.ERR.Fatalln(err)
 	}
-	//googleConf, err = loader.JSON[config.Google](configs["google_sso_config.json"])
-	//if err != nil {
-	//	logger.ERR.Fatalln(err)
-	//}
+	googleConf, err = loader.JSON[config.Google](configs["google_sso_config.json"])
+	if err != nil {
+		logger.ERR.Fatalln(err)
+	}
 	logger.INFO.Println("Configs loaded")
 }
 
 func main() {
 	var (
-		render         port.Renderer
-		projectRepo    port.ProjectRepo
-		groupRepo      port.GroupRepo
-		userRepo       port.UserRepo
-		userService    port.UserService
-		groupService   port.GroupService
-		_              port.ProjectService
-		pageController port.PageController
-		err            error
+		render            port.Renderer
+		projectRepo       port.ProjectRepo
+		groupRepo         port.GroupRepo
+		userRepo          port.UserRepo
+		userService       port.UserService
+		groupService      port.GroupService
+		_                 port.ProjectService
+		pageController    port.PageController
+		onboardController port.OnboardController
+		err               error
 	)
 
 	//Generate html template cache
@@ -117,13 +118,17 @@ func main() {
 	if err != nil {
 		logger.ERR.Fatalln(err)
 	}
+	onboardController, err = controller.NewOnboardController(googleConf)
+	if err != nil {
+		logger.ERR.Fatalln(err)
+	}
 
 	handler := http.NewServeMux()
 	staticPath := "/" + apiConf.Static
 	handler.Handle(staticPath, http.StripPrefix(staticPath, fs))
+	handler.Handle("/", middleware.Get(http.HandlerFunc(pageController.Root)))
 	handler.Handle("/home", middleware.Get(http.HandlerFunc(pageController.Home)))
-	handler.Handle("/signup", middleware.Get(http.HandlerFunc(pageController.SignUp)))
-	handler.Handle("/login", middleware.Get(http.HandlerFunc(pageController.Login)))
+	handler.Handle("/signup", middleware.Get(http.HandlerFunc(onboardController.Signup)))
 
 	url := fmt.Sprintf("%s:%s", apiConf.Host, strconv.Itoa(apiConf.Port))
 	logger.ERR.Fatalln(http.ListenAndServe(url, handler))
