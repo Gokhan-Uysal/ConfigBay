@@ -8,19 +8,17 @@
                     <a href="/">Configbay</a>
                 </h1>
             </div>
-            <div  class="navbar-item flex-center">
-                <a aria-current="page" href="/home">Home</a>
-            </div>
-            <div class="navbar-item flex-center">
-                <a href="/projects">Projects</a>
-            </div>
-            <div class="navbar-item flex-center">
-                <div class="profile-placeholder flex-center">
-                    <img id="profile-picture" src="" alt="Pp">
-                </div>
-            </div>
+            {{range .}}
+                {{template "navbar-item" .}}
+            {{end}}
         </div>
     </nav>
 
     <script type="module" src="/web/static/script/navbar.component.mjs"></script>
+{{end}}
+
+{{define "navbar-item"}}
+    <div class="navbar-item flex-center">
+        <a href="{{.Href}}">{{.Label}}</a>
+    </div>
 {{end}}
