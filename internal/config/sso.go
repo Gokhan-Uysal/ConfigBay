@@ -1,5 +1,10 @@
 package config
 
+type SSOProvider struct {
+	Name string `json:"name"`
+	Icon string `json:"icon"`
+}
+
 type Google struct {
 	ClientId     string   `json:"clientId"`
 	ClientSecret string   `json:"clientSecret"`

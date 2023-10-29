@@ -114,7 +114,7 @@ func main() {
 	}
 
 	//Initialize controllers
-	pageController, err = controller.NewPageController(render, projectService)
+	pageController, err = controller.NewPageController(render, apiConf.SSOProviders, projectService)
 	if err != nil {
 		logger.ERR.Fatalln(err)
 	}

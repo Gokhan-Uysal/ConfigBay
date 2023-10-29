@@ -2,6 +2,7 @@ package controller
 
 import (
 	"github.com/Gokhan-Uysal/ConfigBay.git/internal/adapter/web/payload"
+	"github.com/Gokhan-Uysal/ConfigBay.git/internal/config"
 	"github.com/Gokhan-Uysal/ConfigBay.git/internal/core/domain/common/errorx"
 	"github.com/Gokhan-Uysal/ConfigBay.git/internal/core/port"
 	"net/http"
@@ -11,15 +12,20 @@ import (
 type pageController struct {
 	*baseController
 	renderer       port.Renderer
+	ssoProviders   []config.SSOProvider
 	projectService port.ProjectService
 }
 
 func NewPageController(
 	renderer port.Renderer,
+	ssoProviders []config.SSOProvider,
 	projectService port.ProjectService,
 ) (port.PageController, error) {
 	if renderer == nil {
 		return nil, errorx.NilPointerErr{Item: "renderer"}
+	}
+	if ssoProviders == nil {
+		return nil, errorx.NilPointerErr{Item: "sso providers"}
 	}
 	if projectService == nil {
 		return nil, errorx.NilPointerErr{Item: "project service"}
@@ -27,6 +33,7 @@ func NewPageController(
 	return pageController{
 		baseController: &baseController{},
 		renderer:       renderer,
+		ssoProviders:   ssoProviders,
 		projectService: projectService,
 	}, nil
 }
