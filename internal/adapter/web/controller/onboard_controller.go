@@ -19,7 +19,18 @@ func NewOnboardController(googleConf *config.Google) (port.OnboardController, er
 	return &onboardController{baseController: &baseController{}, googleConf: googleConf}, nil
 }
 
-func (oc onboardController) Signup(w http.ResponseWriter, r *http.Request) {
+func (oc onboardController) SignupWith(w http.ResponseWriter, r *http.Request) {
+	provider := r.URL.Query().Get("provider")
+	if provider == "" {
+		w.WriteHeader(http.StatusNotFound)
+		return
+	}
+
+	w = oc.enableCors(w)
+	w = oc.addCors(w, oc.googleConf.OAuth2)
+}
+
+func (oc onboardController) LoginWith(w http.ResponseWriter, r *http.Request) {
 	provider := r.URL.Query().Get("provider")
 	if provider == "" {
 		w.WriteHeader(http.StatusNotFound)

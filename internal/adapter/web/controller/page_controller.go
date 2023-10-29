@@ -10,24 +10,41 @@ import (
 
 type pageController struct {
 	*baseController
-	renderer port.Renderer
+	renderer       port.Renderer
+	projectService port.ProjectService
 }
 
-func NewPageController(renderer port.Renderer) (port.PageController, error) {
+func NewPageController(
+	renderer port.Renderer,
+	projectService port.ProjectService,
+) (port.PageController, error) {
 	if renderer == nil {
 		return nil, errorx.NilPointerErr{Item: "renderer"}
 	}
-	return pageController{baseController: &baseController{}, renderer: renderer}, nil
+	if projectService == nil {
+		return nil, errorx.NilPointerErr{Item: "project service"}
+	}
+	return pageController{
+		baseController: &baseController{},
+		renderer:       renderer,
+		projectService: projectService,
+	}, nil
 }
 
 func (pc pageController) Favicon(w http.ResponseWriter, r *http.Request) {
 
 }
 
-func (pc pageController) Home(w http.ResponseWriter, r *http.Request) {
-	homeItem := payload.NavbarItem{Href: "/home", Label: "Home"}
-	projectItem := payload.NavbarItem{Href: "/projects", Label: "Projects"}
+func (pc pageController) Root(w http.ResponseWriter, r *http.Request) {
+	rootPage := payload.RootPage{NavbarItems: payload.RootPageNavbar}
+	if err := pc.renderer.Render("root.page.gohtml", w, rootPage); err == nil {
+		return
+	}
 
+	pc.handleError(w, payload.InternalServerErr)
+}
+
+func (pc pageController) Home(w http.ResponseWriter, r *http.Request) {
 	campus := payload.ProjectItem{
 		Icon:        make([]byte, 0),
 		Title:       "Campus",
@@ -45,7 +62,7 @@ func (pc pageController) Home(w http.ResponseWriter, r *http.Request) {
 		CreatedAt:   time.Now(),
 	}
 	homePage := payload.HomePage{
-		NavbarItems:  []payload.NavbarItem{homeItem, projectItem},
+		NavbarItems:  payload.HomePageNavbar,
 		ProjectItems: []payload.ProjectItem{campus, openWorld},
 	}
 	if err := pc.renderer.Render("home.page.gohtml", w, homePage); err == nil {
@@ -55,8 +72,28 @@ func (pc pageController) Home(w http.ResponseWriter, r *http.Request) {
 	pc.handleError(w, payload.InternalServerErr)
 }
 
-func (pc pageController) Root(w http.ResponseWriter, r *http.Request) {
-	if err := pc.renderer.Render("root.page.gohtml", w, nil); err == nil {
+func (pc pageController) Signup(w http.ResponseWriter, r *http.Request) {
+	onboardPage := payload.OnboardPage{
+		NavbarItems:  payload.RootPageNavbar,
+		Access:       "signup",
+		OnboardItems: []payload.OnboardItem{payload.GoogleItem, payload.GithubItem},
+	}
+
+	if err := pc.renderer.Render("onboard.page.gohtml", w, onboardPage); err == nil {
+		return
+	}
+
+	pc.handleError(w, payload.InternalServerErr)
+}
+
+func (pc pageController) Login(w http.ResponseWriter, r *http.Request) {
+	onboardPage := payload.OnboardPage{
+		NavbarItems:  payload.RootPageNavbar,
+		Access:       "login",
+		OnboardItems: []payload.OnboardItem{payload.GoogleItem, payload.GithubItem},
+	}
+
+	if err := pc.renderer.Render("onboard.page.gohtml", w, onboardPage); err == nil {
 		return
 	}
 

@@ -1,0 +1,33 @@
+{{define "onboard"}}
+    <link href="/web/static/style/onboard.component.css" rel="stylesheet" type="text/css">
+    <script>
+        let access = "{{.Access}}"
+    </script>
+    <div id="signup-item-list">
+        {{if eq .Access "login"}}
+            {{range .OnboardItems}}
+                {{template "login-item" .}}
+            {{end}}
+        {{else if eq .Access "signup"}}
+            {{range .OnboardItems}}
+                {{template "signup-item" .}}
+            {{end}}
+        {{end}}
+    </div>
+
+    <script type="module" src="/web/static/script/onboard.component.mjs"></script>
+{{end}}
+
+{{define "signup-item"}}
+    <button class="onboard-item" id="{{.Provider}}">
+        <img src="/web/static/asset/icon/{{.Icon}}.svg" class="onboard-icon" alt="{{.Provider}} icon">
+        Signup with {{.Provider}}
+    </button>
+{{end}}
+
+{{define "login-item"}}
+    <button class="onboard-item" id="{{.Provider}}">
+        <img src="/web/static/asset/icon/{{.Icon}}.svg" class="onboard-icon" alt="{{.Provider}} icon">
+        Login with {{.Provider}}
+    </button>
+{{end}}

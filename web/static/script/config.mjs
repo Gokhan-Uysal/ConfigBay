@@ -1,7 +1,7 @@
 export const endpoints = {
     newProject: "/project",
-    signup: (provider) => `/signup?${provider}`,
-    login: (provider) => `/login?${provider}`
+    signupWith: (provider) => `/signup-with?${provider}`,
+    loginWith: (provider) => `/login-with?${provider}`
 }
 
 export const providers = {

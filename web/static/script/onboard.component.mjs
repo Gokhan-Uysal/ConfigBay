@@ -2,13 +2,13 @@ import {onClick} from "./lib/document.js";
 import {Get, checkResponse, urlSearchParams} from "./lib/fetch.mjs";
 import {endpoints, providers} from "./config.mjs";
 
-const googleId = "google";
-const githubId = "github";
+const googleId = "Google";
+const githubId = "Github";
 
 const signupWith = async (provider) => {
     try {
         let params = urlSearchParams({provider: provider})
-        const url = endpoints.signup(params.toString());
+        const url = endpoints.signupWith(params.toString());
         let response = await Get(url);
         checkResponse(response);
     }
@@ -20,8 +20,7 @@ const signupWith = async (provider) => {
 const loginWith = async (provider) => {
     try {
         let params = urlSearchParams({provider: provider})
-        const url = endpoints.signup(params.toString());
-        console.log(url);
+        const url = endpoints.loginWith(params.toString());
         let response = await Get(url);
         checkResponse(response);
     }
@@ -31,4 +30,16 @@ const loginWith = async (provider) => {
 }
 
 const googleBtnElement = document.getElementById(googleId);
-onClick(googleBtnElement, () => signupWith(providers.google))
+const githubBtnElement = document.getElementById(githubId);
+
+if (access === "login"){
+    onClick(googleBtnElement, () => loginWith(providers.google))
+    onClick(githubBtnElement    , () => loginWith(providers.github))
+}
+else if (access === "signup"){
+    onClick(googleBtnElement, () => signupWith(providers.google))
+    onClick(githubBtnElement    , () => signupWith(providers.github))
+}
+else {
+    console.error("Access modifier not found in template.")
+}

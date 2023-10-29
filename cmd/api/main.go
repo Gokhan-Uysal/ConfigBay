@@ -57,7 +57,7 @@ func main() {
 		userRepo          port.UserRepo
 		userService       port.UserService
 		groupService      port.GroupService
-		_                 port.ProjectService
+		projectService    port.ProjectService
 		pageController    port.PageController
 		onboardController port.OnboardController
 		err               error
@@ -104,7 +104,7 @@ func main() {
 	if err != nil {
 		logger.ERR.Fatalln(err)
 	}
-	_, err = service.NewProjectService(
+	projectService, err = service.NewProjectService(
 		projectRepo,
 		groupService,
 		userService,
@@ -114,7 +114,7 @@ func main() {
 	}
 
 	//Initialize controllers
-	pageController, err = controller.NewPageController(render)
+	pageController, err = controller.NewPageController(render, projectService)
 	if err != nil {
 		logger.ERR.Fatalln(err)
 	}
@@ -128,7 +128,11 @@ func main() {
 	handler.Handle(staticPath, http.StripPrefix(staticPath, fs))
 	handler.Handle("/", middleware.Get(http.HandlerFunc(pageController.Root)))
 	handler.Handle("/home", middleware.Get(http.HandlerFunc(pageController.Home)))
-	handler.Handle("/signup", middleware.Get(http.HandlerFunc(onboardController.Signup)))
+	handler.Handle("/signup", middleware.Get(http.HandlerFunc(pageController.Signup)))
+	handler.Handle("/login", middleware.Get(http.HandlerFunc(pageController.Login)))
+
+	handler.Handle("/signup-with", middleware.Get(http.HandlerFunc(onboardController.SignupWith)))
+	handler.Handle("/login-with", middleware.Get(http.HandlerFunc(onboardController.LoginWith)))
 
 	url := fmt.Sprintf("%s:%s", apiConf.Host, strconv.Itoa(apiConf.Port))
 	logger.INFO.Printf("Server is listening on %s\n", url)
