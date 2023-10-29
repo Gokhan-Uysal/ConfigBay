@@ -1,14 +1,11 @@
-import {onClick} from "./lib/document.js";
 import {Get, checkResponse, urlSearchParams} from "./lib/fetch.mjs";
-import {endpoints, providers} from "./config.mjs";
+import {endpoints} from "./config.mjs";
+import {onClick} from "./lib/document.js";
 
-const googleId = "Google";
-const githubId = "Github";
-
-const signupWith = async (provider) => {
+export const onboardWith = async (access, provider) => {
     try {
         let params = urlSearchParams({provider: provider})
-        const url = endpoints.signupWith(params.toString());
+        const url = endpoints.onboardWith(access, params.toString());
         let response = await Get(url);
         checkResponse(response);
     }
@@ -17,29 +14,12 @@ const signupWith = async (provider) => {
     }
 }
 
-const loginWith = async (provider) => {
-    try {
-        let params = urlSearchParams({provider: provider})
-        const url = endpoints.loginWith(params.toString());
-        let response = await Get(url);
-        checkResponse(response);
-    }
-    catch (err){
-        console.error(err);
-    }
+const initializeOnboardItems = (access) => {
+    document.querySelectorAll('.onboard-item').forEach(item => {
+        const provider = item.getAttribute('id');
+        onClick(item, () => onboardWith(access, provider))
+    });
 }
 
-const googleBtnElement = document.getElementById(googleId);
-const githubBtnElement = document.getElementById(githubId);
+initializeOnboardItems(access)
 
-if (access === "login"){
-    onClick(googleBtnElement, () => loginWith(providers.google))
-    onClick(githubBtnElement    , () => loginWith(providers.github))
-}
-else if (access === "signup"){
-    onClick(googleBtnElement, () => signupWith(providers.google))
-    onClick(githubBtnElement    , () => signupWith(providers.github))
-}
-else {
-    console.error("Access modifier not found in template.")
-}

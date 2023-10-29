@@ -1,10 +1,10 @@
 export const endpoints = {
     newProject: "/project",
-    signupWith: (provider) => `/signup-with?${provider}`,
-    loginWith: (provider) => `/login-with?${provider}`
-}
-
-export const providers = {
-    google: "google",
-    github: "github"
+    onboardWith: (access, provider) => {
+        if (access !== "login" && access !== "signup"){
+            console.error(`Unknown access modifier ${access}`)
+            return
+        }
+        return `/${access}-with?${provider}`
+    },
 }

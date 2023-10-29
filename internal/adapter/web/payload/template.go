@@ -46,11 +46,11 @@ var signupItem = NavbarItem{Href: "/signup", Label: "Signup"}
 var RootPageNavbar = []NavbarItem{loginItem, signupItem}
 
 var GoogleItem = OnboardItem{
-	Provider: "Google",
+	Provider: "google",
 	Icon:     "google",
 }
 
 var GithubItem = OnboardItem{
-	Provider: "Github",
+	Provider: "github",
 	Icon:     "github",
 }
