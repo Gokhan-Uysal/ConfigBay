@@ -1,0 +1,15 @@
+{
+    "name": "Root",
+    "hasNavbar": true,
+    "hasFooter": true,
+    "authRequired": false,
+    "navbar": [{
+        "label": "Login",
+        "href": "/login"
+    },{
+        "label": "Signup",
+        "href": "/signup"
+    }],
+    "content": {},
+    "footer": {}
+}

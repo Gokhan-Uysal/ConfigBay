@@ -27,7 +27,8 @@ func (oc onboardController) SignupWith(w http.ResponseWriter, r *http.Request) {
 	}
 
 	w = oc.enableCors(w)
-	w = oc.addCors(w, oc.googleConf.OAuth2)
+	w = oc.addCors(w, "https://google.com")
+	http.Redirect(w, r, "https://google.com", http.StatusSeeOther)
 }
 
 func (oc onboardController) LoginWith(w http.ResponseWriter, r *http.Request) {

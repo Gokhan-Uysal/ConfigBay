@@ -19,11 +19,14 @@ import (
 )
 
 var (
-	configs    = make(map[string]string)
-	apiConf    *config.Api
-	dbConf     *config.Db
-	googleConf *config.Google
-	err        error
+	configs         = make(map[string]string)
+	apiConf         *config.Api
+	dbConf          *config.Db
+	googleConf      *config.Google
+	rootPageConf    *config.RootPage
+	homePageConf    *config.HomePage
+	onboardPageConf *config.OnboardPage
+	err             error
 )
 
 func init() {
@@ -46,6 +49,19 @@ func init() {
 	if err != nil {
 		logger.ERR.Fatalln(err)
 	}
+	rootPageConf, err = loader.JSON[config.RootPage](configs["root_page_config.json"])
+	if err != nil {
+		logger.ERR.Fatalln(err)
+	}
+	homePageConf, err = loader.JSON[config.HomePage](configs["home_page_config.json"])
+	if err != nil {
+		logger.ERR.Fatalln(err)
+	}
+	onboardPageConf, err = loader.JSON[config.OnboardPage](configs["onboard_page_config.json"])
+	if err != nil {
+		logger.ERR.Fatalln(err)
+	}
+
 	logger.INFO.Println("Configs loaded")
 }
 
@@ -114,7 +130,14 @@ func main() {
 	}
 
 	//Initialize controllers
-	pageController, err = controller.NewPageController(render, apiConf.SSOProviders, projectService)
+	pageController, err = controller.NewPageController(
+		render,
+		apiConf.SSOProviders,
+		rootPageConf,
+		homePageConf,
+		onboardPageConf,
+		projectService,
+	)
 	if err != nil {
 		logger.ERR.Fatalln(err)
 	}
