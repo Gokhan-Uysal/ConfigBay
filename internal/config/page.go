@@ -1,7 +1,5 @@
 package config
 
-import "time"
-
 type page struct {
 	Name         string   `json:"name"`
 	HasNavbar    bool     `json:"hasNavbar"`
@@ -21,21 +19,11 @@ type OnboardPage struct {
 
 type HomePage struct {
 	page
-	ProjectItems []ProjectItem `json:"projectItems"`
 }
 
 type Navbar struct {
 	Label string `json:"label"`
 	Href  string `json:"href"`
-}
-
-type ProjectItem struct {
-	Icon        []byte
-	Title       string
-	Description string
-	GroupCount  int
-	UserCount   int
-	CreatedAt   time.Time
 }
 
 type Provider struct {

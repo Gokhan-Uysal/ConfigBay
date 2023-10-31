@@ -1,13 +1,13 @@
 {{define "onboard"}}
     <link href="/web/static/style/onboard.component.css" rel="stylesheet" type="text/css">
     <script>
-        let access = {{.Name}}
+        let access = {{.Access}}
         access = access.toLowerCase()
     </script>
-    {{ $topLevelAccess := .Name }}
+    {{ $topLevelAccess := .Access }}
 
     <div id="signup-item-list">
-        {{range .Providers}}
+        {{range .Config.Providers}}
             <button class="onboard-item" id="{{.Provider}}">
                 <img src="{{.Icon}}" class="onboard-icon" alt="{{.Provider}} icon">
                 {{$topLevelAccess}} with {{.Provider}}

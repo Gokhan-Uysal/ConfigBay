@@ -1,11 +1,12 @@
 package controller
 
 import (
-	"fmt"
+	"github.com/Gokhan-Uysal/ConfigBay.git/internal/adapter/web/pagedata"
 	"github.com/Gokhan-Uysal/ConfigBay.git/internal/adapter/web/payload"
 	"github.com/Gokhan-Uysal/ConfigBay.git/internal/config"
 	"github.com/Gokhan-Uysal/ConfigBay.git/internal/core/domain/common/errorx"
 	"github.com/Gokhan-Uysal/ConfigBay.git/internal/core/port"
+	"github.com/Gokhan-Uysal/ConfigBay.git/internal/lib/parser"
 	"net/http"
 )
 
@@ -40,7 +41,6 @@ func NewPageController(
 		return nil, errorx.NilPointerErr{Item: "project service"}
 	}
 
-	fmt.Println(onboardPageConf)
 	return pageController{
 		baseController:  &baseController{},
 		renderer:        renderer,
@@ -57,7 +57,10 @@ func (pc pageController) Favicon(w http.ResponseWriter, r *http.Request) {
 }
 
 func (pc pageController) Root(w http.ResponseWriter, r *http.Request) {
-	if err := pc.renderer.Render("root.page.gohtml", w, pc.rootPageConf); err == nil {
+	rootPage := pagedata.Root{
+		Config: pc.rootPageConf,
+	}
+	if err := pc.renderer.Render("root.page.gohtml", w, rootPage); err == nil {
 		return
 	}
 
@@ -65,16 +68,33 @@ func (pc pageController) Root(w http.ResponseWriter, r *http.Request) {
 }
 
 func (pc pageController) Home(w http.ResponseWriter, r *http.Request) {
-	if err := pc.renderer.Render("home.page.gohtml", w, pc.homePageConf); err == nil {
+	project, err := pc.projectService.Find(
+		parser.MustUUID("aa8e365a-3297-4c9c-a217-890a2c1eef06"),
+		parser.MustUUID("647e3367-e764-4088-9031-64a74a4fec3c"),
+	)
+	if err != nil {
 		return
 	}
 
+	homePage := pagedata.HomePage{
+		Config: pc.homePageConf,
+		ProjectItems: []pagedata.ProjectItem{
+			pagedata.ToProjectItem(project),
+		},
+	}
+
+	if err := pc.renderer.Render("home.page.gohtml", w, homePage); err == nil {
+		return
+	}
 	pc.handleError(w, payload.InternalServerErr)
 }
 
 func (pc pageController) Signup(w http.ResponseWriter, r *http.Request) {
-	pc.onboardPageConf.Name = "Signup"
-	if err := pc.renderer.Render("onboard.page.gohtml", w, pc.onboardPageConf); err == nil {
+	onboardPage := pagedata.Onboard{
+		Config: pc.onboardPageConf,
+		Access: pagedata.Signup,
+	}
+	if err := pc.renderer.Render("onboard.page.gohtml", w, onboardPage); err == nil {
 		return
 	}
 
@@ -82,8 +102,11 @@ func (pc pageController) Signup(w http.ResponseWriter, r *http.Request) {
 }
 
 func (pc pageController) Login(w http.ResponseWriter, r *http.Request) {
-	pc.onboardPageConf.Name = "Login"
-	if err := pc.renderer.Render("onboard.page.gohtml", w, pc.onboardPageConf); err == nil {
+	onboardPage := pagedata.Onboard{
+		Config: pc.onboardPageConf,
+		Access: pagedata.Login,
+	}
+	if err := pc.renderer.Render("onboard.page.gohtml", w, onboardPage); err == nil {
 		return
 	}
 
