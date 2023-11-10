@@ -68,9 +68,9 @@ func (pc pageController) Root(w http.ResponseWriter, r *http.Request) {
 }
 
 func (pc pageController) Home(w http.ResponseWriter, r *http.Request) {
-	cookie, err := r.Cookie("CODE")
+	cookie, err := r.Cookie("code")
 	if err != nil || cookie == nil {
-		pc.handleErrorPage(w, payload.Unauthorized)
+		http.Redirect(w, r, "/", http.StatusSeeOther)
 		return
 	}
 

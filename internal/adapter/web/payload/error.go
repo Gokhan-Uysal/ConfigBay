@@ -9,20 +9,20 @@ type HTTPError struct {
 
 var InternalServerErr = HTTPError{
 	StatusCode:    http.StatusInternalServerError,
-	StatusMessage: "Internal server error",
+	StatusMessage: "internal server error",
 }
 
 var PageNotFound = HTTPError{
 	StatusCode:    http.StatusNotFound,
-	StatusMessage: "Page not found",
+	StatusMessage: "page not found",
 }
 
 var Unauthorized = HTTPError{
 	StatusCode:    http.StatusUnauthorized,
-	StatusMessage: "Unauthorized access",
+	StatusMessage: "unauthorized access",
 }
 
 var Forbidden = HTTPError{
 	StatusCode:    http.StatusForbidden,
-	StatusMessage: "Forbidden access",
+	StatusMessage: "forbidden access",
 }

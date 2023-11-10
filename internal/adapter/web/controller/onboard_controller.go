@@ -93,14 +93,14 @@ func (oc onboardController) RedirectGoogle(w http.ResponseWriter, r *http.Reques
 	if code == "" {
 		err := payload.HTTPError{
 			StatusCode:    http.StatusNotFound,
-			StatusMessage: "Authentication code not found in query params",
+			StatusMessage: "authentication code not found in query params",
 		}
 		oc.handleError(w, err)
 		return
 	}
 
 	ssoCookie := &http.Cookie{
-		Name:     "CODE",
+		Name:     "code",
 		Value:    code,
 		Secure:   true,
 		HttpOnly: true,
