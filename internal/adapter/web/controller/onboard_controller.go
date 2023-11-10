@@ -2,10 +2,13 @@ package controller
 
 import (
 	"bytes"
+	"fmt"
+	"github.com/Gokhan-Uysal/ConfigBay.git/internal/adapter/web/payload"
 	"github.com/Gokhan-Uysal/ConfigBay.git/internal/config"
 	"github.com/Gokhan-Uysal/ConfigBay.git/internal/core/domain/common/errorx"
 	"github.com/Gokhan-Uysal/ConfigBay.git/internal/core/port"
 	"github.com/Gokhan-Uysal/ConfigBay.git/internal/lib/builder"
+	"github.com/Gokhan-Uysal/ConfigBay.git/internal/lib/logger"
 	"net/http"
 	"strconv"
 	"strings"
@@ -29,22 +32,42 @@ func (oc onboardController) SignupWith(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(http.StatusNotFound)
 		return
 	}
-
 	var buffer bytes.Buffer
-	buffer.WriteString(oc.googleConf.OAuth2)
 
-	queryBuilder := builder.NewQuery()
-	queryBuilder.Add("client_id", oc.googleConf.ClientId)
-	queryBuilder.Add("redirect_uri", oc.googleConf.RedirectUrl)
-	queryBuilder.Add("response_type", oc.googleConf.ResponseType)
-	queryBuilder.Add("scope", strings.Join(oc.googleConf.Scopes, " "))
-	queryBuilder.Add("access_type", oc.googleConf.AccessType)
-	queryBuilder.Add(
-		"include_granted_scopes", strconv.FormatBool(oc.googleConf.IncludeGrantedScopes),
-	)
+	switch provider {
+	case "google":
+		buffer.WriteString(oc.googleConf.OAuth2)
 
-	buffer.WriteString(queryBuilder.Build())
-	http.Redirect(w, r, buffer.String(), http.StatusFound)
+		queryBuilder := builder.NewQuery()
+		queryBuilder.Add("client_id", oc.googleConf.ClientId)
+		queryBuilder.Add("redirect_uri", oc.googleConf.RedirectUrl)
+		queryBuilder.Add("response_type", oc.googleConf.ResponseType)
+		queryBuilder.Add("scope", strings.Join(oc.googleConf.Scopes, " "))
+		queryBuilder.Add("access_type", oc.googleConf.AccessType)
+		queryBuilder.Add(
+			"include_granted_scopes", strconv.FormatBool(oc.googleConf.IncludeGrantedScopes),
+		)
+
+		buffer.WriteString(queryBuilder.Build())
+		break
+	default:
+		err := payload.HTTPError{
+			StatusCode:    http.StatusNotFound,
+			StatusMessage: fmt.Sprintf("Provider %s not found", provider),
+		}
+		oc.handleError(w, err)
+	}
+
+	sso := payload.SSO{
+		Provider: provider,
+		Url:      buffer.String(),
+	}
+	err := oc.handleResponse(w, sso)
+	if err != nil {
+		logger.ERR.Println(err)
+		w.WriteHeader(http.StatusInternalServerError)
+		return
+	}
 }
 
 func (oc onboardController) LoginWith(w http.ResponseWriter, r *http.Request) {

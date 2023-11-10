@@ -1,8 +1,7 @@
 {{define "onboard"}}
     <link href="/web/static/style/onboard.component.css" rel="stylesheet" type="text/css">
     <script>
-        let access = {{.Access}}
-        access = access.toLowerCase()
+        let access = {{.Access}}.toString().toLowerCase()
     </script>
     {{ $topLevelAccess := .Access }}
 

@@ -3,8 +3,8 @@ package payload
 import "net/http"
 
 type HTTPError struct {
-	StatusCode    int
-	StatusMessage string
+	StatusCode    int    `json:"statusCode"`
+	StatusMessage string `json:"statusMessage"`
 }
 
 var InternalServerErr = HTTPError{
