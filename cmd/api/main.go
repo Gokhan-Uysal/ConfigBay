@@ -156,6 +156,9 @@ func main() {
 
 	handler.Handle("/signup-with", middleware.Get(http.HandlerFunc(onboardController.SignupWith)))
 	handler.Handle("/login-with", middleware.Get(http.HandlerFunc(onboardController.LoginWith)))
+	handler.Handle(
+		"/redirect/google", middleware.Get(http.HandlerFunc(onboardController.RedirectGoogle)),
+	)
 
 	url := fmt.Sprintf("%s:%s", apiConf.Host, strconv.Itoa(apiConf.Port))
 	logger.INFO.Printf("Server is listening on %s\n", url)

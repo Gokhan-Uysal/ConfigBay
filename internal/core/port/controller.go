@@ -13,5 +13,6 @@ type (
 	OnboardController interface {
 		SignupWith(w http.ResponseWriter, r *http.Request)
 		LoginWith(w http.ResponseWriter, r *http.Request)
+		RedirectGoogle(w http.ResponseWriter, r *http.Request)
 	}
 )

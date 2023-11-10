@@ -64,10 +64,16 @@ func (pc pageController) Root(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	pc.handleError(w, payload.InternalServerErr)
+	pc.handleErrorPage(w, payload.InternalServerErr)
 }
 
 func (pc pageController) Home(w http.ResponseWriter, r *http.Request) {
+	cookie, err := r.Cookie("CODE")
+	if err != nil || cookie == nil {
+		pc.handleErrorPage(w, payload.Unauthorized)
+		return
+	}
+
 	project, err := pc.projectService.Find(
 		parser.MustUUID("aa8e365a-3297-4c9c-a217-890a2c1eef06"),
 		parser.MustUUID("647e3367-e764-4088-9031-64a74a4fec3c"),
@@ -86,7 +92,7 @@ func (pc pageController) Home(w http.ResponseWriter, r *http.Request) {
 	if err := pc.renderer.Render("home.page.gohtml", w, homePage); err == nil {
 		return
 	}
-	pc.handleError(w, payload.InternalServerErr)
+	pc.handleErrorPage(w, payload.InternalServerErr)
 }
 
 func (pc pageController) Signup(w http.ResponseWriter, r *http.Request) {
@@ -98,7 +104,7 @@ func (pc pageController) Signup(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	pc.handleError(w, payload.InternalServerErr)
+	pc.handleErrorPage(w, payload.InternalServerErr)
 }
 
 func (pc pageController) Login(w http.ResponseWriter, r *http.Request) {
@@ -110,10 +116,10 @@ func (pc pageController) Login(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	pc.handleError(w, payload.InternalServerErr)
+	pc.handleErrorPage(w, payload.InternalServerErr)
 }
 
-func (pc pageController) handleError(w http.ResponseWriter, httpErr payload.HTTPError) {
+func (pc pageController) handleErrorPage(w http.ResponseWriter, httpErr payload.HTTPError) {
 	if err := pc.renderer.Render("error.page.gohtml", w, httpErr); err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
 	}

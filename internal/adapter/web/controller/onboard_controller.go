@@ -76,7 +76,38 @@ func (oc onboardController) LoginWith(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(http.StatusNotFound)
 		return
 	}
+}
 
-	w = oc.enableCors(w)
-	w = oc.addCors(w, oc.googleConf.OAuth2)
+func (oc onboardController) RedirectGoogle(w http.ResponseWriter, r *http.Request) {
+	redirectErr := r.URL.Query().Get("error")
+	if redirectErr != "" {
+		err := payload.HTTPError{
+			StatusCode:    http.StatusForbidden,
+			StatusMessage: redirectErr,
+		}
+		oc.handleError(w, err)
+		return
+	}
+
+	code := r.URL.Query().Get("code")
+	if code == "" {
+		err := payload.HTTPError{
+			StatusCode:    http.StatusNotFound,
+			StatusMessage: "Authentication code not found in query params",
+		}
+		oc.handleError(w, err)
+		return
+	}
+
+	ssoCookie := &http.Cookie{
+		Name:     "CODE",
+		Value:    code,
+		Secure:   true,
+		HttpOnly: true,
+		MaxAge:   60 * 20,
+		SameSite: http.SameSiteStrictMode,
+	}
+
+	http.SetCookie(w, ssoCookie)
+	http.Redirect(w, r, "/home", http.StatusSeeOther)
 }
