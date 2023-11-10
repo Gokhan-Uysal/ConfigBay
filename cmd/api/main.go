@@ -19,7 +19,7 @@ import (
 )
 
 var (
-	configs         = make(map[string]string)
+	configs         map[string]string
 	apiConf         *config.Api
 	dbConf          *config.Db
 	googleConf      *config.Google

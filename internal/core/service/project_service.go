@@ -5,7 +5,7 @@ import (
 	"github.com/Gokhan-Uysal/ConfigBay.git/internal/core/domain/common/errorx"
 	"github.com/Gokhan-Uysal/ConfigBay.git/internal/core/domain/valueobject"
 	"github.com/Gokhan-Uysal/ConfigBay.git/internal/core/port"
-	"github.com/Gokhan-Uysal/ConfigBay.git/internal/lib/generator"
+	"github.com/Gokhan-Uysal/ConfigBay.git/internal/lib/builder"
 	"github.com/Gokhan-Uysal/ConfigBay.git/internal/lib/logger"
 	"time"
 )
@@ -56,7 +56,7 @@ func (ps projectService) Create(
 		return nil, err
 	}
 
-	project = aggregate.NewProjectBuilder(generator.UUID(), projectTitle).
+	project = aggregate.NewProjectBuilder(builder.UUID(), projectTitle).
 		CreatedAt(time.Now()).
 		UpdatedAt(time.Now()).
 		Build()
