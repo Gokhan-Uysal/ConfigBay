@@ -103,21 +103,23 @@ func (oc onboardController) RedirectGoogle(w http.ResponseWriter, r *http.Reques
 
 	var url bytes.Buffer
 
-	url.WriteString(oc.googleConf.OAuth2Url)
+	url.WriteString(oc.googleConf.TokenUrl)
 
 	queryBuilder := builder.NewQuery()
 	queryBuilder.Add("code", code)
 	queryBuilder.Add("client_id", oc.googleConf.ClientId)
 	queryBuilder.Add("client_secret", oc.googleConf.ClientSecret)
-	queryBuilder.Add("redirect_uri", config.RedirectGoogleToken.String())
+	queryBuilder.Add("redirect_uri", oc.googleConf.RedirectTokenUrl)
 	queryBuilder.Add("grant_type", "authorization_code")
 
 	url.WriteString(queryBuilder.Build())
 
-	_, err := http.Post(url.String(), "application/x-www-form-urlencoded", nil)
-	if err != nil {
-		http.Redirect(w, r, config.Root.String(), http.StatusSeeOther)
-	}
+	go func() {
+		_, err := http.Post(url.String(), "application/x-www-form-urlencoded", nil)
+		if err != nil {
+			logger.ERR.Println(err)
+		}
+	}()
 }
 
 func (oc onboardController) RedirectGoogleToken(w http.ResponseWriter, r *http.Request) {
