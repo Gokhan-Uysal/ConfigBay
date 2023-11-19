@@ -18,11 +18,12 @@ func (e Endpoint) String() string {
 }
 
 const (
-	Root           Endpoint = "/root"
-	Home           Endpoint = "/home"
-	Signup         Endpoint = "/signup"
-	Login          Endpoint = "/login"
-	SignupWith     Endpoint = "/signup-with"
-	LoginWith      Endpoint = "/login-with"
-	RedirectGoogle Endpoint = "/redirect/google"
+	Root                Endpoint = "/root"
+	Home                Endpoint = "/home"
+	Signup              Endpoint = "/signup"
+	Login               Endpoint = "/login"
+	SignupWith          Endpoint = "/signup-with"
+	LoginWith           Endpoint = "/login-with"
+	RedirectGoogle      Endpoint = "/redirect/google"
+	RedirectGoogleToken Endpoint = "/redirect/google/token"
 )

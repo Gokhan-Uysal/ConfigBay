@@ -173,6 +173,14 @@ func main() {
 			),
 		),
 	)
+	handler.Handle(
+		config.RedirectGoogleToken.String(),
+		middleware.Get(
+			http.HandlerFunc(
+				onboardController.RedirectGoogleToken,
+			),
+		),
+	)
 
 	url := fmt.Sprintf("%s:%s", apiConf.Host, strconv.Itoa(apiConf.Port))
 	logger.INFO.Printf("Server is listening on %s\n", url)

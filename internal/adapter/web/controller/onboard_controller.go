@@ -2,6 +2,7 @@ package controller
 
 import (
 	"bytes"
+	"encoding/json"
 	"fmt"
 	"github.com/Gokhan-Uysal/ConfigBay.git/internal/adapter/web/payload"
 	"github.com/Gokhan-Uysal/ConfigBay.git/internal/config"
@@ -9,6 +10,7 @@ import (
 	"github.com/Gokhan-Uysal/ConfigBay.git/internal/core/port"
 	"github.com/Gokhan-Uysal/ConfigBay.git/internal/lib/builder"
 	"github.com/Gokhan-Uysal/ConfigBay.git/internal/lib/logger"
+	"io"
 	"net/http"
 	"strconv"
 	"strings"
@@ -32,15 +34,15 @@ func (oc onboardController) SignupWith(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(http.StatusNotFound)
 		return
 	}
-	var buffer bytes.Buffer
+	var url bytes.Buffer
 
 	switch provider {
 	case "google":
-		buffer.WriteString(oc.googleConf.OAuth2)
+		url.WriteString(oc.googleConf.OAuth2Url)
 
 		queryBuilder := builder.NewQuery()
 		queryBuilder.Add("client_id", oc.googleConf.ClientId)
-		queryBuilder.Add("redirect_uri", oc.googleConf.RedirectUrl)
+		queryBuilder.Add("redirect_uri", oc.googleConf.RedirectCodeUrl)
 		queryBuilder.Add("response_type", oc.googleConf.ResponseType)
 		queryBuilder.Add("scope", strings.Join(oc.googleConf.Scopes, " "))
 		queryBuilder.Add("access_type", oc.googleConf.AccessType)
@@ -48,7 +50,7 @@ func (oc onboardController) SignupWith(w http.ResponseWriter, r *http.Request) {
 			"include_granted_scopes", strconv.FormatBool(oc.googleConf.IncludeGrantedScopes),
 		)
 
-		buffer.WriteString(queryBuilder.Build())
+		url.WriteString(queryBuilder.Build())
 		break
 	default:
 		err := payload.HTTPError{
@@ -60,7 +62,7 @@ func (oc onboardController) SignupWith(w http.ResponseWriter, r *http.Request) {
 
 	sso := payload.SSO{
 		Provider: provider,
-		Url:      buffer.String(),
+		Url:      url.String(),
 	}
 	err := oc.handleResponse(w, sso)
 	if err != nil {
@@ -99,17 +101,43 @@ func (oc onboardController) RedirectGoogle(w http.ResponseWriter, r *http.Reques
 		return
 	}
 
-	ssoCookie := &http.Cookie{
-		Name:     "code",
-		Value:    code,
-		Secure:   true,
-		HttpOnly: true,
-		MaxAge:   60 * 20,
-		Path:     config.Home.String(),
-		SameSite: http.SameSiteDefaultMode,
-	}
+	var url bytes.Buffer
 
-	http.SetCookie(w, ssoCookie)
-	r.AddCookie(ssoCookie)
-	http.Redirect(w, r, config.Home.String(), http.StatusSeeOther)
+	url.WriteString(oc.googleConf.OAuth2Url)
+
+	queryBuilder := builder.NewQuery()
+	queryBuilder.Add("code", code)
+	queryBuilder.Add("client_id", oc.googleConf.ClientId)
+	queryBuilder.Add("client_secret", oc.googleConf.ClientSecret)
+	queryBuilder.Add("redirect_uri", config.RedirectGoogleToken.String())
+	queryBuilder.Add("grant_type", "authorization_code")
+
+	url.WriteString(queryBuilder.Build())
+
+	_, err := http.Post(url.String(), "application/x-www-form-urlencoded", nil)
+	if err != nil {
+		http.Redirect(w, r, config.Root.String(), http.StatusSeeOther)
+	}
+}
+
+func (oc onboardController) RedirectGoogleToken(w http.ResponseWriter, r *http.Request) {
+	var (
+		tokenResp payload.GoogleTokenResp
+		data      []byte
+		err       error
+	)
+
+	data, err = io.ReadAll(r.Body)
+	if err != nil {
+		logger.ERR.Println(err)
+		http.Redirect(w, r, config.Root.String(), http.StatusSeeOther)
+		return
+	}
+	err = json.Unmarshal(data, &tokenResp)
+	if err != nil {
+		logger.ERR.Println(err)
+		http.Redirect(w, r, config.Root.String(), http.StatusSeeOther)
+		return
+	}
+	logger.INFO.Println(tokenResp)
 }

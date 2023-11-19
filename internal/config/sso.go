@@ -8,9 +8,11 @@ type SSOProvider struct {
 type Google struct {
 	ClientId             string   `json:"clientId"`
 	ClientSecret         string   `json:"clientSecret"`
-	OAuth2               string   `json:"oauth2"`
+	OAuth2Url            string   `json:"OAuth2Url"`
+	TokenUrl             string   `json:"tokenUrl"`
 	ResponseType         string   `json:"responseType"`
-	RedirectUrl          string   `json:"redirectUrl"`
+	RedirectCodeUrl      string   `json:"redirectCodeUrl"`
+	RedirectTokenUrl     string   `json:"redirectTokenUrl"`
 	Scopes               []string `json:"scopes"`
 	AccessType           string   `json:"accessType"`
 	IncludeGrantedScopes bool     `json:"includeGrantedScopes"`
