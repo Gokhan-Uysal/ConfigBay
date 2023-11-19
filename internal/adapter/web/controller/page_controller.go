@@ -70,7 +70,7 @@ func (pc pageController) Root(w http.ResponseWriter, r *http.Request) {
 func (pc pageController) Home(w http.ResponseWriter, r *http.Request) {
 	cookie, err := r.Cookie("code")
 	if err != nil || cookie == nil {
-		http.Redirect(w, r, "/", http.StatusSeeOther)
+		http.Redirect(w, r, config.Root.String(), http.StatusSeeOther)
 		return
 	}
 
@@ -100,10 +100,10 @@ func (pc pageController) Signup(w http.ResponseWriter, r *http.Request) {
 		Config: pc.onboardPageConf,
 		Access: pagedata.Signup,
 	}
+
 	if err := pc.renderer.Render("onboard.page.gohtml", w, onboardPage); err == nil {
 		return
 	}
-
 	pc.handleErrorPage(w, payload.InternalServerErr)
 }
 
@@ -112,10 +112,10 @@ func (pc pageController) Login(w http.ResponseWriter, r *http.Request) {
 		Config: pc.onboardPageConf,
 		Access: pagedata.Login,
 	}
+
 	if err := pc.renderer.Render("onboard.page.gohtml", w, onboardPage); err == nil {
 		return
 	}
-
 	pc.handleErrorPage(w, payload.InternalServerErr)
 }
 

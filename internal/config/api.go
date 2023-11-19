@@ -10,3 +10,19 @@ type Api struct {
 	Static       string        `json:"static"`
 	SSOProviders []SSOProvider `json:"ssoProviders"`
 }
+
+type Endpoint string
+
+func (e Endpoint) String() string {
+	return string(e)
+}
+
+const (
+	Root           Endpoint = "/root"
+	Home           Endpoint = "/home"
+	Signup         Endpoint = "/signup"
+	Login          Endpoint = "/login"
+	SignupWith     Endpoint = "/signup-with"
+	LoginWith      Endpoint = "/login-with"
+	RedirectGoogle Endpoint = "/redirect/google"
+)

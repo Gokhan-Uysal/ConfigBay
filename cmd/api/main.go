@@ -149,15 +149,29 @@ func main() {
 	handler := http.NewServeMux()
 	staticPath := "/" + apiConf.Static
 	handler.Handle(staticPath, http.StripPrefix(staticPath, fs))
-	handler.Handle("/", middleware.Get(http.HandlerFunc(pageController.Root)))
-	handler.Handle("/home", middleware.Get(http.HandlerFunc(pageController.Home)))
-	handler.Handle("/signup", middleware.Get(http.HandlerFunc(pageController.Signup)))
-	handler.Handle("/login", middleware.Get(http.HandlerFunc(pageController.Login)))
+	handler.Handle(config.Root.String(), middleware.Get(http.HandlerFunc(pageController.Root)))
+	handler.Handle(config.Home.String(), middleware.Get(http.HandlerFunc(pageController.Home)))
+	handler.Handle(config.Signup.String(), middleware.Get(http.HandlerFunc(pageController.Signup)))
+	handler.Handle(config.Login.String(), middleware.Get(http.HandlerFunc(pageController.Login)))
 
-	handler.Handle("/signup-with", middleware.Get(http.HandlerFunc(onboardController.SignupWith)))
-	handler.Handle("/login-with", middleware.Get(http.HandlerFunc(onboardController.LoginWith)))
 	handler.Handle(
-		"/redirect/google", middleware.Get(http.HandlerFunc(onboardController.RedirectGoogle)),
+		config.SignupWith.String(),
+		middleware.Get(
+			http.HandlerFunc(
+				onboardController.SignupWith,
+			),
+		),
+	)
+	handler.Handle(
+		config.LoginWith.String(), middleware.Get(http.HandlerFunc(onboardController.LoginWith)),
+	)
+	handler.Handle(
+		config.RedirectGoogle.String(),
+		middleware.Get(
+			http.HandlerFunc(
+				onboardController.RedirectGoogle,
+			),
+		),
 	)
 
 	url := fmt.Sprintf("%s:%s", apiConf.Host, strconv.Itoa(apiConf.Port))

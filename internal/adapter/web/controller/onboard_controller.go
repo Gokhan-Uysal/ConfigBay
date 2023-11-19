@@ -105,9 +105,11 @@ func (oc onboardController) RedirectGoogle(w http.ResponseWriter, r *http.Reques
 		Secure:   true,
 		HttpOnly: true,
 		MaxAge:   60 * 20,
-		SameSite: http.SameSiteStrictMode,
+		Path:     config.Home.String(),
+		SameSite: http.SameSiteDefaultMode,
 	}
 
 	http.SetCookie(w, ssoCookie)
-	http.Redirect(w, r, "/home", http.StatusSeeOther)
+	r.AddCookie(ssoCookie)
+	http.Redirect(w, r, config.Home.String(), http.StatusSeeOther)
 }
