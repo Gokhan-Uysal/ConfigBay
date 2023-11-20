@@ -9,7 +9,7 @@ type Google struct {
 	ClientId             string   `json:"clientId"`
 	ClientSecret         string   `json:"clientSecret"`
 	OAuth2Url            string   `json:"OAuth2Url"`
-	TokenUrl             string   `json:"tokenUrl"`
+	ApiUrl               string   `json:"apiUrl"`
 	ResponseType         string   `json:"responseType"`
 	RedirectUrl          string   `json:"redirectUrl"`
 	Scopes               []string `json:"scopes"`

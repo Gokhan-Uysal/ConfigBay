@@ -5,7 +5,7 @@ type SSO struct {
 	Url      string `json:"url"`
 }
 
-type GoogleTokenResp struct {
+type GoogleToken struct {
 	TokenType    string `json:"token_type"`
 	Scope        string `json:"scope"`
 	AccessToken  string `json:"access_token"`

@@ -1,31 +1,28 @@
 package controller
 
 import (
-	"bytes"
-	"encoding/json"
 	"fmt"
 	"github.com/Gokhan-Uysal/ConfigBay.git/internal/adapter/web/payload"
 	"github.com/Gokhan-Uysal/ConfigBay.git/internal/config"
 	"github.com/Gokhan-Uysal/ConfigBay.git/internal/core/domain/common/errorx"
 	"github.com/Gokhan-Uysal/ConfigBay.git/internal/core/port"
-	"github.com/Gokhan-Uysal/ConfigBay.git/internal/lib/builder"
 	"github.com/Gokhan-Uysal/ConfigBay.git/internal/lib/logger"
-	"io"
 	"net/http"
-	"strconv"
-	"strings"
 )
 
 type onboardController struct {
 	*baseController
-	googleConf *config.Google
+	googleAuthService port.GoogleAuthService
 }
 
-func NewOnboardController(googleConf *config.Google) (port.OnboardController, error) {
-	if googleConf == nil {
-		return nil, errorx.NilPointerErr{Item: "google config"}
+func NewOnboardController(googleAuthService port.GoogleAuthService) (port.OnboardController, error) {
+	if googleAuthService == nil {
+		return nil, errorx.NilPointerErr{Item: "google authentication service"}
 	}
-	return &onboardController{baseController: &baseController{}, googleConf: googleConf}, nil
+	return &onboardController{
+		baseController:    &baseController{},
+		googleAuthService: googleAuthService,
+	}, nil
 }
 
 func (oc onboardController) SignupWith(w http.ResponseWriter, r *http.Request) {
@@ -34,23 +31,15 @@ func (oc onboardController) SignupWith(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(http.StatusNotFound)
 		return
 	}
-	var url bytes.Buffer
+
+	var (
+		sso payload.SSO
+		err error
+	)
 
 	switch provider {
 	case "google":
-		url.WriteString(oc.googleConf.OAuth2Url)
-
-		queryBuilder := builder.NewQuery()
-		queryBuilder.Add("client_id", oc.googleConf.ClientId)
-		queryBuilder.Add("redirect_uri", oc.googleConf.RedirectUrl)
-		queryBuilder.Add("response_type", oc.googleConf.ResponseType)
-		queryBuilder.Add("scope", strings.Join(oc.googleConf.Scopes, " "))
-		queryBuilder.Add("access_type", oc.googleConf.AccessType)
-		queryBuilder.Add(
-			"include_granted_scopes", strconv.FormatBool(oc.googleConf.IncludeGrantedScopes),
-		)
-
-		url.WriteString(queryBuilder.Build())
+		sso = oc.googleAuthService.BuildSSO(provider)
 		break
 	default:
 		err := payload.HTTPError{
@@ -60,11 +49,7 @@ func (oc onboardController) SignupWith(w http.ResponseWriter, r *http.Request) {
 		oc.handleError(w, err)
 	}
 
-	sso := payload.SSO{
-		Provider: provider,
-		Url:      url.String(),
-	}
-	err := oc.handleResponse(w, sso)
+	err = oc.handleResponse(w, sso)
 	if err != nil {
 		logger.ERR.Println(err)
 		w.WriteHeader(http.StatusInternalServerError)
@@ -82,7 +67,7 @@ func (oc onboardController) LoginWith(w http.ResponseWriter, r *http.Request) {
 
 func (oc onboardController) RedirectGoogle(w http.ResponseWriter, r *http.Request) {
 	var (
-		tokenResp *payload.GoogleTokenResp
+		tokenResp *payload.GoogleToken
 		code      string
 		cookie    *http.Cookie
 		err       error
@@ -107,7 +92,7 @@ func (oc onboardController) RedirectGoogle(w http.ResponseWriter, r *http.Reques
 		return
 	}
 
-	tokenResp, err = oc.fetchToken(code)
+	tokenResp, err = oc.googleAuthService.FetchToken(code)
 	if err != nil {
 		err := payload.HTTPError{
 			StatusCode:    http.StatusNotFound,
@@ -116,6 +101,7 @@ func (oc onboardController) RedirectGoogle(w http.ResponseWriter, r *http.Reques
 		oc.handleError(w, err)
 		return
 	}
+
 	cookie = &http.Cookie{
 		Name:     "token",
 		Value:    tokenResp.AccessToken,
@@ -130,41 +116,4 @@ func (oc onboardController) RedirectGoogle(w http.ResponseWriter, r *http.Reques
 	r.AddCookie(cookie)
 
 	http.Redirect(w, r, config.Home.String(), http.StatusSeeOther)
-}
-
-func (oc onboardController) fetchToken(code string) (*payload.GoogleTokenResp, error) {
-	var (
-		resp      *http.Response
-		url       bytes.Buffer
-		tokenResp payload.GoogleTokenResp
-		data      []byte
-		err       error
-	)
-
-	url.WriteString(oc.googleConf.TokenUrl)
-
-	queryBuilder := builder.NewQuery()
-	queryBuilder.Add("code", code)
-	queryBuilder.Add("client_id", oc.googleConf.ClientId)
-	queryBuilder.Add("client_secret", oc.googleConf.ClientSecret)
-	queryBuilder.Add("redirect_uri", oc.googleConf.RedirectUrl)
-	queryBuilder.Add("grant_type", "authorization_code")
-
-	url.WriteString(queryBuilder.Build())
-	resp, err = http.Post(url.String(), "application/x-www-form-urlencoded", nil)
-	if err != nil {
-		return nil, err
-	}
-
-	data, err = io.ReadAll(resp.Body)
-	if err != nil {
-		return nil, err
-	}
-
-	err = json.Unmarshal(data, &tokenResp)
-	if err != nil {
-		return nil, err
-	}
-
-	return &tokenResp, nil
 }

@@ -10,6 +10,7 @@ import (
 	"github.com/Gokhan-Uysal/ConfigBay.git/internal/config"
 	"github.com/Gokhan-Uysal/ConfigBay.git/internal/core/port"
 	"github.com/Gokhan-Uysal/ConfigBay.git/internal/core/service"
+	"github.com/Gokhan-Uysal/ConfigBay.git/internal/infrastructure/auth"
 	"github.com/Gokhan-Uysal/ConfigBay.git/internal/lib/loader"
 	"github.com/Gokhan-Uysal/ConfigBay.git/internal/lib/logger"
 	"github.com/Gokhan-Uysal/ConfigBay.git/internal/lib/mapper"
@@ -74,6 +75,7 @@ func main() {
 		userService       port.UserService
 		groupService      port.GroupService
 		projectService    port.ProjectService
+		googleAuthService port.GoogleAuthService
 		pageController    port.PageController
 		onboardController port.OnboardController
 		err               error
@@ -128,6 +130,10 @@ func main() {
 	if err != nil {
 		logger.ERR.Fatalln(err)
 	}
+	googleAuthService, err = auth.NewGoogleAuthService(googleConf)
+	if err != nil {
+		logger.ERR.Fatalln(err)
+	}
 
 	//Initialize controllers
 	pageController, err = controller.NewPageController(
@@ -141,7 +147,7 @@ func main() {
 	if err != nil {
 		logger.ERR.Fatalln(err)
 	}
-	onboardController, err = controller.NewOnboardController(googleConf)
+	onboardController, err = controller.NewOnboardController(googleAuthService)
 	if err != nil {
 		logger.ERR.Fatalln(err)
 	}
