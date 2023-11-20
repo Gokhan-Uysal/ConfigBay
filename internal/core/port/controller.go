@@ -14,6 +14,5 @@ type (
 		SignupWith(w http.ResponseWriter, r *http.Request)
 		LoginWith(w http.ResponseWriter, r *http.Request)
 		RedirectGoogle(w http.ResponseWriter, r *http.Request)
-		RedirectGoogleToken(w http.ResponseWriter, r *http.Request)
 	}
 )

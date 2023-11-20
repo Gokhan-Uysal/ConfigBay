@@ -11,8 +11,7 @@ type Google struct {
 	OAuth2Url            string   `json:"OAuth2Url"`
 	TokenUrl             string   `json:"tokenUrl"`
 	ResponseType         string   `json:"responseType"`
-	RedirectCodeUrl      string   `json:"redirectCodeUrl"`
-	RedirectTokenUrl     string   `json:"redirectTokenUrl"`
+	RedirectUrl          string   `json:"redirectUrl"`
 	Scopes               []string `json:"scopes"`
 	AccessType           string   `json:"accessType"`
 	IncludeGrantedScopes bool     `json:"includeGrantedScopes"`

@@ -42,7 +42,7 @@ func (oc onboardController) SignupWith(w http.ResponseWriter, r *http.Request) {
 
 		queryBuilder := builder.NewQuery()
 		queryBuilder.Add("client_id", oc.googleConf.ClientId)
-		queryBuilder.Add("redirect_uri", oc.googleConf.RedirectCodeUrl)
+		queryBuilder.Add("redirect_uri", oc.googleConf.RedirectUrl)
 		queryBuilder.Add("response_type", oc.googleConf.ResponseType)
 		queryBuilder.Add("scope", strings.Join(oc.googleConf.Scopes, " "))
 		queryBuilder.Add("access_type", oc.googleConf.AccessType)
@@ -81,17 +81,23 @@ func (oc onboardController) LoginWith(w http.ResponseWriter, r *http.Request) {
 }
 
 func (oc onboardController) RedirectGoogle(w http.ResponseWriter, r *http.Request) {
-	redirectErr := r.URL.Query().Get("error")
-	if redirectErr != "" {
+	var (
+		tokenResp *payload.GoogleTokenResp
+		code      string
+		cookie    *http.Cookie
+		err       error
+	)
+	errMessage := r.URL.Query().Get("error")
+	if errMessage != "" {
 		err := payload.HTTPError{
 			StatusCode:    http.StatusForbidden,
-			StatusMessage: redirectErr,
+			StatusMessage: errMessage,
 		}
 		oc.handleError(w, err)
 		return
 	}
 
-	code := r.URL.Query().Get("code")
+	code = r.URL.Query().Get("code")
 	if code == "" {
 		err := payload.HTTPError{
 			StatusCode:    http.StatusNotFound,
@@ -101,7 +107,39 @@ func (oc onboardController) RedirectGoogle(w http.ResponseWriter, r *http.Reques
 		return
 	}
 
-	var url bytes.Buffer
+	tokenResp, err = oc.fetchToken(code)
+	if err != nil {
+		err := payload.HTTPError{
+			StatusCode:    http.StatusNotFound,
+			StatusMessage: err.Error(),
+		}
+		oc.handleError(w, err)
+		return
+	}
+	cookie = &http.Cookie{
+		Name:     "token",
+		Value:    tokenResp.AccessToken,
+		Path:     config.Home.String(),
+		MaxAge:   tokenResp.ExpiresIn,
+		Secure:   true,
+		HttpOnly: true,
+		SameSite: http.SameSiteDefaultMode,
+	}
+
+	http.SetCookie(w, cookie)
+	r.AddCookie(cookie)
+
+	http.Redirect(w, r, config.Home.String(), http.StatusSeeOther)
+}
+
+func (oc onboardController) fetchToken(code string) (*payload.GoogleTokenResp, error) {
+	var (
+		resp      *http.Response
+		url       bytes.Buffer
+		tokenResp payload.GoogleTokenResp
+		data      []byte
+		err       error
+	)
 
 	url.WriteString(oc.googleConf.TokenUrl)
 
@@ -109,37 +147,24 @@ func (oc onboardController) RedirectGoogle(w http.ResponseWriter, r *http.Reques
 	queryBuilder.Add("code", code)
 	queryBuilder.Add("client_id", oc.googleConf.ClientId)
 	queryBuilder.Add("client_secret", oc.googleConf.ClientSecret)
-	queryBuilder.Add("redirect_uri", oc.googleConf.RedirectTokenUrl)
+	queryBuilder.Add("redirect_uri", oc.googleConf.RedirectUrl)
 	queryBuilder.Add("grant_type", "authorization_code")
 
 	url.WriteString(queryBuilder.Build())
-
-	go func() {
-		_, err := http.Post(url.String(), "application/x-www-form-urlencoded", nil)
-		if err != nil {
-			logger.ERR.Println(err)
-		}
-	}()
-}
-
-func (oc onboardController) RedirectGoogleToken(w http.ResponseWriter, r *http.Request) {
-	var (
-		tokenResp payload.GoogleTokenResp
-		data      []byte
-		err       error
-	)
-
-	data, err = io.ReadAll(r.Body)
+	resp, err = http.Post(url.String(), "application/x-www-form-urlencoded", nil)
 	if err != nil {
-		logger.ERR.Println(err)
-		http.Redirect(w, r, config.Root.String(), http.StatusSeeOther)
-		return
+		return nil, err
 	}
+
+	data, err = io.ReadAll(resp.Body)
+	if err != nil {
+		return nil, err
+	}
+
 	err = json.Unmarshal(data, &tokenResp)
 	if err != nil {
-		logger.ERR.Println(err)
-		http.Redirect(w, r, config.Root.String(), http.StatusSeeOther)
-		return
+		return nil, err
 	}
-	logger.INFO.Println(tokenResp)
+
+	return &tokenResp, nil
 }

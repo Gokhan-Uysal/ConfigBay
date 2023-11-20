@@ -147,7 +147,8 @@ func main() {
 	}
 
 	handler := http.NewServeMux()
-	staticPath := "/" + apiConf.Static
+	staticPath := config.Root.String() + apiConf.Static
+
 	handler.Handle(staticPath, http.StripPrefix(staticPath, fs))
 	handler.Handle(config.Root.String(), middleware.Get(http.HandlerFunc(pageController.Root)))
 	handler.Handle(config.Home.String(), middleware.Get(http.HandlerFunc(pageController.Home)))
@@ -170,14 +171,6 @@ func main() {
 		middleware.Get(
 			http.HandlerFunc(
 				onboardController.RedirectGoogle,
-			),
-		),
-	)
-	handler.Handle(
-		config.RedirectGoogleToken.String(),
-		middleware.Get(
-			http.HandlerFunc(
-				onboardController.RedirectGoogleToken,
 			),
 		),
 	)

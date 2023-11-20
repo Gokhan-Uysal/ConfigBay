@@ -68,7 +68,7 @@ func (pc pageController) Root(w http.ResponseWriter, r *http.Request) {
 }
 
 func (pc pageController) Home(w http.ResponseWriter, r *http.Request) {
-	cookie, err := r.Cookie("code")
+	cookie, err := r.Cookie("token")
 	if err != nil || cookie == nil {
 		http.Redirect(w, r, config.Root.String(), http.StatusSeeOther)
 		return

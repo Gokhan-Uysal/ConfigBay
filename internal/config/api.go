@@ -18,7 +18,7 @@ func (e Endpoint) String() string {
 }
 
 const (
-	Root                Endpoint = "/root"
+	Root                Endpoint = "/"
 	Home                Endpoint = "/home"
 	Signup              Endpoint = "/signup"
 	Login               Endpoint = "/login"
