@@ -2,6 +2,10 @@ package main
 
 import (
 	"fmt"
+	"net/http"
+	"os"
+	"strconv"
+
 	"github.com/Gokhan-Uysal/ConfigBay.git/internal/adapter/db"
 	"github.com/Gokhan-Uysal/ConfigBay.git/internal/adapter/repo"
 	"github.com/Gokhan-Uysal/ConfigBay.git/internal/adapter/web/controller"
@@ -11,12 +15,8 @@ import (
 	"github.com/Gokhan-Uysal/ConfigBay.git/internal/core/port"
 	"github.com/Gokhan-Uysal/ConfigBay.git/internal/core/service"
 	"github.com/Gokhan-Uysal/ConfigBay.git/internal/infrastructure/auth"
-	"github.com/Gokhan-Uysal/ConfigBay.git/internal/lib/loader"
 	"github.com/Gokhan-Uysal/ConfigBay.git/internal/lib/logger"
 	"github.com/Gokhan-Uysal/ConfigBay.git/internal/lib/mapper"
-	"net/http"
-	"os"
-	"strconv"
 )
 
 var (
@@ -38,27 +38,27 @@ func init() {
 	}
 
 	//Mapping configs to structs
-	apiConf, err = loader.JSON[config.Api](configs["api_config.json"])
+	apiConf, err = mapper.JSON[config.Api](configs["api_config.json"])
 	if err != nil {
 		logger.ERR.Fatalln(err)
 	}
-	dbConf, err = loader.JSON[config.Db](configs["db_config.json"])
+	dbConf, err = mapper.JSON[config.Db](configs["db_config.json"])
 	if err != nil {
 		logger.ERR.Fatalln(err)
 	}
-	googleConf, err = loader.JSON[config.Google](configs["google_sso_config.json"])
+	googleConf, err = mapper.JSON[config.Google](configs["google_sso_config.json"])
 	if err != nil {
 		logger.ERR.Fatalln(err)
 	}
-	rootPageConf, err = loader.JSON[config.RootPage](configs["root_page_config.json"])
+	rootPageConf, err = mapper.JSON[config.RootPage](configs["root_page_config.json"])
 	if err != nil {
 		logger.ERR.Fatalln(err)
 	}
-	homePageConf, err = loader.JSON[config.HomePage](configs["home_page_config.json"])
+	homePageConf, err = mapper.JSON[config.HomePage](configs["home_page_config.json"])
 	if err != nil {
 		logger.ERR.Fatalln(err)
 	}
-	onboardPageConf, err = loader.JSON[config.OnboardPage](configs["onboard_page_config.json"])
+	onboardPageConf, err = mapper.JSON[config.OnboardPage](configs["onboard_page_config.json"])
 	if err != nil {
 		logger.ERR.Fatalln(err)
 	}
