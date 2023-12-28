@@ -1,0 +1,17 @@
+{{define "onboard"}}
+    <link href="/web/static/style/onboard.component.css" rel="stylesheet" type="text/css">
+    <script>
+        let access = {{.Access}}.toString().toLowerCase()
+    </script>
+    {{ $topLevelAccess := .Access }}
+
+    <div id="signup-item-list">
+        {{range .Config.Providers}}
+            <button class="onboard-item" id="{{.Provider}}">
+                <img src="{{.Icon}}" class="onboard-icon" alt="{{.Provider}} icon">
+                {{$topLevelAccess}} with {{.Provider}}
+            </button>
+        {{end}}
+    </div>
+    <script type="module" src="/web/static/script/onboard.component.mjs"></script>
+{{end}}

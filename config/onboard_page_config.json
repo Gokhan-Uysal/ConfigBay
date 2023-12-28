@@ -1,0 +1,21 @@
+{
+    "name": "Onboard",
+    "hasNavbar": true,
+    "hasFooter": false,
+    "authRequired": false,
+    "navbar": [{
+        "label": "Login",
+        "href": "/login"
+    },{
+        "label": "Signup",
+        "href": "/signup"
+    }],
+    "content": {},
+    "providers": [{
+        "provider": "google",
+        "icon": "/web/static/asset/icon/google.svg"
+    },{
+        "provider": "github",
+        "icon": "/web/static/asset/icon/github.svg"
+    }]
+}

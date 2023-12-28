@@ -1,10 +1,5 @@
 @import "base.layout.css";
 
-:root {
-    --nav-height: 2rem;
-    --font-size: 1rem;
-}
-
 .header {
     margin-top: 5rem;
     display: grid;
@@ -39,7 +34,7 @@
     min-height: 50%;
 
     min-width: 8rem;
-    font-size: 0.8rem;
+    font-size: 0.7rem;
 }
 
 #project-search {
