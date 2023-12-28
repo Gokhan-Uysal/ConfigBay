@@ -50,11 +50,11 @@ func (r *renderer) Load(path string) error {
 		pageName = filepath.Base(page)
 
 		tmpl = template.New(pageName)
-		tmpl, err = tmpl.ParseFiles(components...)
+		tmpl, err = tmpl.ParseFiles(layouts...)
 		if err != nil {
 			return err
 		}
-		tmpl, err = tmpl.ParseFiles(layouts...)
+		tmpl, err = tmpl.ParseFiles(components...)
 		if err != nil {
 			return err
 		}
@@ -64,7 +64,6 @@ func (r *renderer) Load(path string) error {
 		}
 
 		r.templates[pageName] = tmpl
-		fmt.Println(r.templates[pageName], "\t", tmpl)
 	}
 	return nil
 }

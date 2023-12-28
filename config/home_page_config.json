@@ -1,0 +1,15 @@
+{
+    "name": "Home",
+    "hasNavbar": true,
+    "hasFooter": true,
+    "authRequired": true,
+    "navbar": [{
+        "label": "Home",
+        "href": "/home"
+    },{
+        "label": "Projects",
+        "href": "/projects"
+    }],
+    "content": {},
+    "footer": {}
+}

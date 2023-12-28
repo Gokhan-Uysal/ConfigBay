@@ -1,0 +1,40 @@
+@import "base.layout.css";
+
+#signup-item-list {
+    max-width: 20rem;
+    width: 90%;
+
+    height: 15rem;
+
+    display: flex;
+    flex-direction: column;
+    justify-content: end;
+    align-items: center;
+    gap: .5em;
+
+    padding-top: 2rem;
+    padding-bottom: 2rem;
+
+    border: 3px solid black;
+    border-radius: 5px;
+}
+
+.onboard-item {
+    display: flex;
+    flex-direction: row;
+    justify-content: space-around;
+    align-items: center;
+
+    width: 80%
+;
+    border: 2px solid black;
+    border-radius: 5px;
+
+    font-size: 1rem;
+    text-transform: capitalize;
+}
+
+.onboard-icon {
+    aspect-ratio: 1;
+    width: 2rem;
+}

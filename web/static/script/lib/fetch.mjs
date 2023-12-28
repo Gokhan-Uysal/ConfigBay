@@ -10,7 +10,7 @@ const requestOptions = (method, body) => {
         headers: {
             "Content-Type": "application/json",
         },
-        body: body ? JSON.stringify(body) : ""
+        body: body ? JSON.stringify(body) : undefined
     }
 }
 
@@ -25,6 +25,44 @@ export const Get = (url) => {
     checkUrl(url);
 
     return fetch(url, requestOptions("GET"))
+}
+
+export const checkResponse = (response) => {
+    if (!(response instanceof Response)) {
+        throw new Error(`Unknown response type ${typeof response}`);
+    }
+
+    const statusCode = response.status;
+
+    if (statusCode >= 100 && statusCode < 200) {
+        console.debug(`Information response with [${statusCode}] from [${response.url}]`);
+        return;
+    }
+
+    if (statusCode >= 200 && statusCode < 300) {
+        console.debug(`Successful response with [${statusCode}] from [${response.url}]`)
+        return;
+    }
+
+    if (statusCode >= 300 && statusCode < 400) {
+        console.debug(`Redirection message response with [${statusCode}] from [${response.url}]`)
+        return;
+    }
+
+    if (statusCode >= 400 && statusCode < 500) {
+        throw new Error(`Client error response with [${statusCode}] from [${response.url}]`);
+    }
+
+    if (statusCode >= 500) {
+        throw new Error(`Server error response with [${statusCode}] from [${response.url}]`);
+    }
+}
+
+export const urlSearchParams = (params) => {
+    if (typeof params !== "object"){
+        throw new Error(`Unknown parameter type ${typeof params}`)
+    }
+    return new URLSearchParams(params);
 }
 
 const checkUrl = (url) => {

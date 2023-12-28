@@ -5,5 +5,12 @@
   "port": 8000,
   "logLevel": "DEBUG",
   "template": "web/template/",
-  "static": "web/static/"
+  "static": "web/static/",
+  "ssoProviders": [{
+    "Name": "Google",
+    "Icon": "google"
+  },{
+    "Name": "Github",
+    "Icon": "github"
+  }]
 }

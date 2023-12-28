@@ -5,7 +5,7 @@ import (
 	"github.com/Gokhan-Uysal/ConfigBay.git/internal/core/domain/common/errorx"
 	"github.com/Gokhan-Uysal/ConfigBay.git/internal/core/domain/valueobject"
 	"github.com/Gokhan-Uysal/ConfigBay.git/internal/core/port"
-	"github.com/Gokhan-Uysal/ConfigBay.git/internal/lib/generator"
+	"github.com/Gokhan-Uysal/ConfigBay.git/internal/lib/builder"
 	"github.com/Gokhan-Uysal/ConfigBay.git/internal/lib/logger"
 )
 
@@ -37,7 +37,7 @@ func (gs groupService) CreateGroup(
 		adminGroup aggregate.Group
 		err        error
 	)
-	adminGroup = aggregate.NewGroupBuilder(generator.UUID(), groupTitle, projectId).
+	adminGroup = aggregate.NewGroupBuilder(builder.UUID(), groupTitle, projectId).
 		Role(role).
 		Users(userIds...).
 		Build()

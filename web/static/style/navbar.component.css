@@ -3,15 +3,11 @@
 :root {
     --nav-bg: #FAFAFA;
 
-    --navbar-height: 4em;
+    --navbar-height: 4rem;
 
     --items: 0;
 }
 
-a {
-    text-decoration: none;
-    color: black;
-}
 
 nav {
     background-color: var(--nav-bg);
